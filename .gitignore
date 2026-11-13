@@ -1,0 +1,40 @@
+# Informes diarios (generados automáticamente)
+informes/
+
+# Registro y copias de seguridad
+registro*.json
+*_copia_*.json
+
+# Logs de ejecución
+*.log
+ejecucion.log
+
+# Caché y temporales de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Directorios de entornos virtuales
+venv/
+ENV/
+env/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak

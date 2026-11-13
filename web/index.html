@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licitaciones</title>
+<style>/* Paleta corporativa de Telefónica (archivo .ase). Azul #0066ff, grises Grey 0-9 y colores secundarios:
+   orquídea = nuevas, naranja = encaje alto, turquesa = actualizadas, amarillo = encaje medio, coral = plazo urgente o cerrado.
+   El mapa usa el azul corporativo en cuatro tonos (los tonos claros son el azul mezclado con blanco). */
+:root{
+  --papel:#f7f7ff; --tarjeta:#ffffff; --tinta:#031a34; --suave:#58617a; --linea:#d1d5e4;
+  --marca:#0066ff; --marca-fondo:#e5efff; --sobre-marca:#ffffff;
+  --orq:#7f258e; --orq-bg:#f1e0fa; --orq-tx:#471551; --sobre-orq:#ffffff;
+  --nar:#c48349; --nar-bg:#fce3cd; --nar-tx:#63442a;
+  --tur:#528889; --tur-bg:#c5f8f9; --tur-tx:#253d3c;
+  --ama:#a7863e; --ama-bg:#f8f0bd; --ama-tx:#473515;
+  --cor:#d6786b; --cor-bg:#f9eeed; --cor-tx:#843c34;
+  --alerta:#843c34; --alerta-fondo:#f9eeed; --bien:#253d3c; --bien-fondo:#c5f8f9;
+  --mapa0:#e9ebf3; --mapa1:#cce0ff; --mapa2:#80b2ff; --mapa3:#0066ff; --mapa4:#031a34;
+  --g1:#0066ff; --g2:#b86be8; --g3:#c48349; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#528889; --g8:#6e7894;
+  --sombra:0 1px 2px rgba(3,26,52,.05),0 6px 18px rgba(3,26,52,.05);
+  --fuente:"Bahnschrift","Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+:root[data-tema="oscuro"]{
+  --papel:#031a34; --tarjeta:#0c2543; --tinta:#f7f7ff; --suave:#b0b6ca; --linea:#27395a;
+  --marca:#4d94ff; --marca-fondo:#11315f; --sobre-marca:#031a34;
+  --orq:#b86be8; --orq-bg:#3b1d52; --orq-tx:#e1c3f4; --sobre-orq:#031a34;
+  --nar:#f4c495; --nar-bg:#4a331f; --nar-tx:#fce3cd;
+  --tur:#75c0c7; --tur-bg:#1c4447; --tur-tx:#c5f8f9;
+  --ama:#e4c35c; --ama-bg:#473515; --ama-tx:#f3e996;
+  --cor:#d6786b; --cor-bg:#491818; --cor-tx:#f2b1a5;
+  --alerta:#f2b1a5; --alerta-fondo:#491818; --bien:#c5f8f9; --bien-fondo:#1c4447;
+  --mapa0:#17304f; --mapa1:#1d4278; --mapa2:#2a6bd0; --mapa3:#5b9bff; --mapa4:#b8d4ff;
+  --g1:#4d94ff; --g2:#b86be8; --g3:#f4c495; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#8fc9cf; --g8:#8f97af;
+  --sombra:0 1px 2px rgba(0,0,0,.3);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="claro"]){
+    --papel:#031a34; --tarjeta:#0c2543; --tinta:#f7f7ff; --suave:#b0b6ca; --linea:#27395a;
+    --marca:#4d94ff; --marca-fondo:#11315f; --sobre-marca:#031a34;
+    --orq:#b86be8; --orq-bg:#3b1d52; --orq-tx:#e1c3f4; --sobre-orq:#031a34;
+    --nar:#f4c495; --nar-bg:#4a331f; --nar-tx:#fce3cd;
+    --tur:#75c0c7; --tur-bg:#1c4447; --tur-tx:#c5f8f9;
+    --ama:#e4c35c; --ama-bg:#473515; --ama-tx:#f3e996;
+    --cor:#d6786b; --cor-bg:#491818; --cor-tx:#f2b1a5;
+    --alerta:#f2b1a5; --alerta-fondo:#491818; --bien:#c5f8f9; --bien-fondo:#1c4447;
+    --mapa0:#17304f; --mapa1:#1d4278; --mapa2:#2a6bd0; --mapa3:#5b9bff; --mapa4:#b8d4ff;
+    --g1:#4d94ff; --g2:#b86be8; --g3:#f4c495; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#8fc9cf; --g8:#8f97af;
+    --sombra:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.5 var(--fuente)}
+a{color:var(--marca)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--marca);outline-offset:2px;border-radius:4px}
+.contenedor{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* cabecera */
+header.cab{background:var(--tarjeta);border-bottom:1px solid var(--linea);position:sticky;top:0;z-index:5}
+header.cab .contenedor{display:flex;align-items:center;gap:22px;min-height:64px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.logo{display:flex;align-items:center;gap:11px;font-weight:700;font-size:18px;line-height:1.15;letter-spacing:.005em;text-decoration:none;color:var(--tinta)}
+.logo svg{width:34px;height:34px;flex:none;color:var(--marca)}
+.logo small{display:block;font-weight:400;font-size:12px;color:var(--suave);letter-spacing:0}
+.logo small:empty{display:none}
+/* logo propio (Configuración > Empresa): uno para el tema claro y otro para el oscuro */
+.logo img.lg{width:34px;height:34px;flex:none;object-fit:contain;display:none}
+.logo.con-logo svg{display:none}
+.logo.con-logo img.lg-claro{display:block}
+:root[data-tema="oscuro"] .logo.con-logo img.lg-claro{display:none}
+:root[data-tema="oscuro"] .logo.con-logo img.lg-oscuro{display:block}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="claro"]) .logo.con-logo img.lg-claro{display:none}
+  :root:not([data-tema="claro"]) .logo.con-logo img.lg-oscuro{display:block}
+}
+nav.menu{display:flex;gap:2px;flex:1;flex-wrap:wrap}
+nav.menu a{padding:8px 15px;border-radius:999px;text-decoration:none;color:var(--suave);font-weight:600}
+nav.menu a[aria-current="page"]{background:var(--marca-fondo);color:var(--marca)}
+nav.menu a:hover{color:var(--tinta)}
+nav.menu a.fin{margin-left:auto}
+.tema{background:none;border:1px solid var(--linea);border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--suave)}
+.tema:hover{border-color:var(--marca);color:var(--tinta)}
+
+main{padding:26px 0 64px}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.015em;margin:0 0 6px}
+h2{font-size:17px;line-height:1.3;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 6px}
+.sub{color:var(--suave);margin:0 0 20px}
+.aviso{border-radius:10px;padding:11px 15px;margin:0 0 16px;border:1px solid}
+.aviso.mal{background:var(--cor-bg);border-color:var(--cor);color:var(--cor-tx)}
+.aviso.ojo{background:var(--ama-bg);border-color:var(--ama);color:var(--ama-tx)}
+.aviso strong{display:block}
+
+.rejilla{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:900px){.rejilla{grid-template-columns:1fr}}
+.panel{background:var(--tarjeta);border:1px solid var(--linea);border-radius:14px;padding:18px 20px;box-shadow:var(--sombra)}
+.panel+.panel{margin-top:20px}
+.panel-cab{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 14px;margin-bottom:10px}
+.panel-cab h2{margin:0}
+.panel-cab p{margin:0;font-size:12.5px;color:var(--suave)}
+
+/* mapa de comunidades */
+.mapa-stage{position:relative;width:min(100%,calc(76vh * 1.136));aspect-ratio:960/845;margin:0 auto;overflow:hidden;border-radius:10px;touch-action:none;user-select:none;-webkit-user-select:none}
+#m-svg{display:block;width:100%;height:100%;cursor:grab}
+#m-svg.reposo{cursor:default}
+#m-svg.arrastre{cursor:grabbing}
+.region{stroke:var(--tarjeta);stroke-width:1;stroke-linejoin:round;vector-effect:non-scaling-stroke;transition:fill .15s;cursor:zoom-in}
+.region.n0{fill:var(--mapa0)}
+.region.n1{fill:var(--mapa1)}
+.region.n2{fill:var(--mapa2)}
+.region.n3{fill:var(--mapa3)}
+.region.n4{fill:var(--mapa4)}
+.region.sobre{stroke:var(--tinta);stroke-width:1.8}
+.region.elegida{stroke:var(--tinta);stroke-width:2.2}
+.inset{fill:none;stroke:var(--linea);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:4 3}
+.guia{stroke:var(--mapa4);stroke-width:1.25;opacity:.7}
+.ancla{fill:var(--mapa4)}
+.burbuja .b{transition:transform .12s ease-out;transform-box:fill-box;transform-origin:center}
+.burbuja.sobre .b{transform:scale(1.08)}
+.lk{outline:none;cursor:pointer}
+.bc{fill:var(--tarjeta);stroke:var(--mapa4);stroke-width:2;transition:fill .12s}
+.bc.vacia{stroke:var(--linea);stroke-width:1.5}
+.lk:hover .bc{fill:var(--marca-fondo)}
+.lk:focus-visible .bc{stroke:var(--tinta);stroke-width:3.5}
+.bn{fill:var(--tinta);font-family:var(--fuente);font-weight:700;text-anchor:middle;dominant-baseline:central;font-variant-numeric:tabular-nums;pointer-events:none}
+.bn.vacia{fill:var(--suave);font-weight:600}
+.pill{fill:var(--orq);stroke:var(--tarjeta);stroke-width:1.5;transition:fill .12s}
+.lk-hoy:hover .pill{fill:var(--tinta)}
+.lk-hoy:focus-visible .pill{stroke:var(--tinta);stroke-width:2.5}
+.pt{fill:var(--sobre-orq);font-family:var(--fuente);font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.mapa-ctl{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:6px}
+.mapa-ctl button,.m-back{font:inherit;color:var(--tinta);background:var(--tarjeta);border:1px solid var(--linea);cursor:pointer;box-shadow:var(--sombra)}
+.mapa-ctl button{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;padding:0}
+.mapa-ctl button:hover,.m-back:hover{border-color:var(--marca)}
+.mapa-ctl svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.m-back{position:absolute;top:6px;left:6px;height:36px;padding:0 13px;border-radius:9px;font-size:14px;font-weight:600}
+[hidden]{display:none!important}
+.m-tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--tinta);color:var(--papel);border-radius:10px;padding:10px 12px;min-width:170px;max-width:240px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:3}
+.m-tip .mt-n{font-weight:700;font-size:14px}
+.m-tip .mt-v{margin-top:2px}
+.m-tip .mt-v b{font-size:24px;font-weight:700;margin-right:2px;font-variant-numeric:tabular-nums}
+.m-tip .mt-h{font-weight:700}
+.m-tip .mt-h.nada,.m-tip .mt-r{font-weight:400;opacity:.7}
+.m-tip .mt-r{margin-top:3px;font-size:12px}
+.leyenda{display:flex;align-items:center;gap:6px 14px;font-size:12.5px;color:var(--suave);margin-top:12px;flex-wrap:wrap}
+.leyenda .sw{display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
+.leyenda i{width:20px;height:11px;border-radius:3px;display:inline-block}
+.leyenda .clave{display:inline-flex;align-items:center;gap:6px}
+.leyenda .kb{min-width:28px;height:18px;padding:0 6px;border-radius:9px;background:var(--orq);color:var(--sobre-orq);font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.otras{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--linea);background:var(--tarjeta);border-radius:999px;padding:5px 14px;cursor:pointer;text-decoration:none;color:var(--tinta);font-size:13.5px}
+.chip:hover{border-color:var(--marca);background:var(--marca-fondo)}
+.chip b{margin-left:6px}
+
+/* etiquetas */
+.et{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.et.alto{background:var(--nar-bg);color:var(--nar-tx)}
+.et.medio{background:var(--ama-bg);color:var(--ama-tx)}
+.et.nueva{background:var(--orq-bg);color:var(--orq-tx)}
+.et.act{background:var(--tur-bg);color:var(--tur-tx)}
+.et.ya{background:var(--mapa0);color:var(--suave)}
+.et.cerrada,.et.urgente{background:var(--cor-bg);color:var(--cor-tx)}
+
+/* listas de licitaciones */
+.lista{list-style:none;margin:0;padding:0}
+.fila{display:block;text-decoration:none;color:inherit;padding:13px 10px;margin:0 -10px;border-bottom:1px solid var(--linea);border-radius:8px}
+.fila:last-child{border-bottom:0}
+.fila:hover{background:var(--papel)}
+.fila:hover .tit{text-decoration:underline}
+.fila .tit{font-weight:600;line-height:1.3}
+.fila .meta{color:var(--suave);font-size:13px;margin-top:4px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center}
+.fila .meta .imp{color:var(--tinta);font-weight:600}
+.pal{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+.pal span{background:var(--marca-fondo);color:var(--marca);border-radius:999px;padding:0 9px;font-size:12px}
+.vacio{color:var(--suave);padding:20px 4px}
+.vacio b{color:var(--tinta)}
+
+/* resumen de hoy */
+.cifras{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.cifra{background:var(--papel);border-radius:10px;padding:12px 14px}
+.cifra b{display:block;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
+.cifra span{font-size:12px;color:var(--suave)}
+.cifra:nth-child(1){background:var(--orq-bg)}.cifra:nth-child(1) b{color:var(--orq)}.cifra:nth-child(1) span{color:var(--orq-tx)}
+.cifra:nth-child(2){background:var(--nar-bg)}.cifra:nth-child(2) b,.cifra:nth-child(2) span{color:var(--nar-tx)}
+.cifra:nth-child(3){background:var(--tur-bg)}.cifra:nth-child(3) b,.cifra:nth-child(3) span{color:var(--tur-tx)}
+
+/* listado */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:end;background:var(--tarjeta);border:1px solid var(--linea);border-radius:14px;padding:14px 16px;box-shadow:var(--sombra)}
+.filtros label{display:flex;flex-direction:column;font-size:12px;color:var(--suave);gap:3px}
+.filtros input,.filtros select{border:1px solid var(--linea);background:var(--tarjeta);border-radius:8px;padding:8px 10px;min-width:140px}
+.filtros input[type=search]{min-width:220px}
+.boton{border:1px solid var(--marca);background:var(--marca);color:var(--sobre-marca);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block}
+.boton:hover{filter:brightness(1.08)}
+.boton.sec{background:none;color:var(--marca)}
+.boton.sec:hover{background:var(--marca-fondo);filter:none}
+.cuenta{color:var(--suave);margin:0 0 8px}
+
+/* ficha */
+.ficha-cab{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.datos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:16px 0}
+.dato{background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:10px 14px}
+.dato span{display:block;font-size:12px;color:var(--suave)}
+.dato b{font-size:16px}
+.tabla{width:100%;border-collapse:collapse;font-size:14px}
+.tabla th,.tabla td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+.tabla th{font-size:12px;color:var(--suave);font-weight:600}
+.tabla td.num{text-align:right;white-space:nowrap}
+.pag{display:inline-block;margin:0 4px 4px 0;padding:0 9px;border:1px solid var(--marca);border-radius:999px;text-decoration:none;font-size:13px}
+.extracto{color:var(--suave);font-size:13px;margin-top:3px}
+.volver{display:inline-block;margin-bottom:14px;text-decoration:none;font-weight:600}
+.tabla.dias td a{margin-right:10px}
+.pie{color:var(--suave);font-size:12px;margin-top:24px}
+
+/* estadísticas de Inicio por grupo de palabras clave */
+.est{background:var(--tarjeta);border:1px solid var(--linea);border-radius:14px;padding:18px 20px;margin:0 0 20px;box-shadow:var(--sombra)}
+.est h2{margin:0 0 2px}
+.est h2:focus{outline:none}
+.est .sub{margin:0 0 14px;font-size:13px}
+.est-kpis{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.est-kpi{background:var(--papel);border-radius:10px;padding:9px 16px;min-width:160px}
+.est-kpi b{display:block;font-size:28px;line-height:1.1;color:var(--marca);font-variant-numeric:tabular-nums}
+.est-kpi span{font-size:12px;color:var(--suave)}
+.est-kpi:nth-child(1){background:var(--marca-fondo)}
+.est-kpi:nth-child(2){background:var(--tur-bg)}.est-kpi:nth-child(2) b,.est-kpi:nth-child(2) span{color:var(--tur-tx)}
+.est-lista{list-style:none;margin:0;padding:0}
+.est-fila{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:4px 14px;align-items:center;width:100%;padding:10px 8px;border:0;border-bottom:1px solid var(--linea);border-radius:8px;background:none;text-align:left;text-decoration:none;color:var(--tinta);cursor:pointer}
+.est-lista li:last-child .est-fila{border-bottom:0}
+.est-fila:hover{background:var(--marca-fondo)}
+.est-fila .est-n{display:flex;align-items:center;gap:8px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.est-fila .est-n i{flex:none;width:10px;height:10px;border-radius:50%}
+.est-fila b{font-size:16px;font-variant-numeric:tabular-nums}
+.est-barra{display:block;height:8px;background:var(--mapa0);border-radius:4px;overflow:hidden}
+.est-barra span{display:block;height:100%;border-radius:4px}
+.est-volver{border:0;background:none;color:var(--marca);font-weight:600;padding:4px 0;margin:0 0 8px;cursor:pointer}
+.est-volver:hover{text-decoration:underline}
+.est-nota{color:var(--suave);font-size:12px;margin:12px 0 0}
+
+@media(max-width:560px){
+  .contenedor{padding:0 14px}
+  main{padding-top:18px}
+  h1{font-size:24px}
+  .panel,.est{padding:14px}
+  .est-fila{grid-template-columns:minmax(0,1fr) auto}
+  .est-fila .est-barra{grid-column:1/-1;order:3}
+  .mapa-ctl button{width:34px;height:34px}
+  header.cab .contenedor{gap:4px 12px;min-height:0}
+  .logo{order:1}
+  .tema{order:2;margin-left:auto}
+  nav.menu{order:3;flex:0 0 100%;margin:0 -8px}
+  nav.menu a{padding:7px 12px}
+}
+@media (prefers-reduced-motion:reduce){.burbuja .b,.region,.bc,.pill{transition:none}}
+@media print{header.cab,.filtros,.volver,.mapa-ctl,.m-back{display:none}}
+</style>
+</head>
+<body>
+<header class="cab"><div class="contenedor">
+  <a class="logo" href="#/" id="logo"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="currentColor"/><circle cx="16" cy="18" r="7.5" fill="none" stroke="var(--tarjeta)" stroke-width="3"/><circle cx="25" cy="9" r="3.6" fill="var(--tarjeta)"/></svg><span>Licitaciones<small id="empresa"></small></span></a>
+  <nav class="menu" aria-label="Principal">
+    <a href="#/" data-v="inicio">Inicio</a>
+    <a href="#/lista" data-v="lista">Todas</a>
+    <a href="#/dias" data-v="dias">Por día</a>
+    <a href="#/config" data-v="config" class="fin">Configuración</a>
+  </nav>
+  <button class="tema" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+</div></header>
+<main><div class="contenedor" id="app"></div></main>
+
+<script type="application/json" id="geo-mapa">{"W":960,"H":811,"inset":{"x":12,"y":699,"w":208,"h":100},"regions":[{"id":"andalucia","name":"Andalucía","d":"M153.84,524.40L155.92,525.07L159.07,527.26L161.47,527.95L163.59,527.58L163.15,530.67L161.78,532.84L162.23,533.60L165.15,533.70L165.10,534.89L166.69,535.68L168.02,534.85L172.85,535.76L175.62,535.41L178.55,539.66L177.98,542.00L179.10,542.63L180.91,541.96L184.61,542.82L184.74,543.71L186.68,543.78L186.08,542.43L188.42,540.43L187.79,539.67L190.56,539.47L192.31,540.41L193.93,540.47L194.63,544.04L196.54,545.13L198.26,547.11L201.97,547.82L203.23,549.04L205.99,549.27L207.08,550.79L211.57,547.22L213.35,547.27L217.93,545.93L219.70,546.57L220.7,545.86L223.61,546.23L225.16,542.87L225.03,541.54L226.17,541.28L227.03,539.67L225.62,537.86L226.84,534.64L229.13,533.81L229.51,531.75L232.31,530.05L233.26,530.52L236.38,529.12L238.30,529.61L240.28,528.18L243.16,529.74L241.82,531.33L242.60,532.53L241.11,533.97L239.15,534.66L239.71,538.23L242.45,538.59L246.94,533.82L250.49,534.5L251.18,532.74L252.31,532.91L253.97,531.17L253.87,528.21L255.18,527.65L254.97,522.47L253.87,521.12L252.98,517.55L251.56,516.48L252.77,512.96L251.04,511.14L251.07,509.81L252.26,506.89L255.87,504.16L258.29,504.36L258.81,502.30L263.72,499.16L264.08,497.09L265.69,497.13L265.25,495.35L266.57,493.45L271.23,493.99L271.10,492.51L272.41,491.06L275.17,489.78L276.33,488.33L278.27,487.33L278.46,486.00L280.21,486.78L280.24,485.30L281.37,485.17L280.32,481.31L281.27,481.92L284.97,481.69L286.24,482.45L290.12,480.60L291.72,480.92L293.30,482.58L293.28,483.76L297.44,485.01L302.10,484.79L302.86,487.16L303.13,491.01L306.47,493.13L308.56,493.01L311.92,494.84L314.00,495.31L314.30,496.94L317.03,497.71L320.22,499.82L320.99,502.35L324.37,502.98L324.67,504.16L325.97,503.74L326.28,504.77L327.88,505.38L329.63,507.47L332.17,511.20L334.59,511.67L341.65,514.84L344.06,516.64L345.35,516.20L344.90,512.21L346.36,511.33L348.62,511.65L353.44,513.31L359.57,513.35L364.24,514.56L370.86,514.60L373.45,513.72L374.73,514.02L376.84,512.26L376.84,510.48L378.46,509.60L381.52,509.46L383.29,510.36L383.94,509.47L386.20,510.51L389.90,511.26L391.84,512.15L394.26,511.12L394.58,506.98L397.49,507.57L398.45,510.82L400.06,510.97L402.48,511.86L405.87,510.97L409.25,508.01L409.41,504.76L412.95,504.16L414.24,504.30L416.18,506.07L423.43,507.09L426.98,508.11L431.64,504.39L436.02,510.13L436.98,508.95L436.65,507.47L439.05,505.09L440.66,504.64L443.08,505.06L444.22,506.39L446.30,504.60L449.99,502.80L450.14,502.06L452.71,500.56L453.18,499.37L455.61,501.27L459.65,502.57L463.66,501.05L465.11,501.04L467.39,503.08L466.6,504.42L467.25,505.74L466.63,508.12L466.98,510.03L468.60,511.05L469.72,510.74L473.28,511.44L472.66,513.82L473.65,515.87L473.38,520.31L473.71,520.90L476.47,521.75L476.97,523.52L476.34,524.86L476.36,526.63L475.73,527.68L476.25,530.92L474.81,532.27L472.75,535.55L471.62,536.15L471.31,537.63L468.75,540.17L470.71,541.48L472.17,541.62L473.96,542.93L477.38,543.92L478.04,544.80L481.78,545.64L484.04,545.32L487.15,547.35L487.33,548.82L488.83,551.32L491.63,554.23L494.74,555.82L496.39,557.71L498.00,556.80L499.95,556.62L501.60,558.67L505.18,558.46L507.46,559.31L509.23,558.25L510.72,559.41L509.29,561.80L509.17,563.87L508.42,568.02L509.31,572.30L508.51,573.05L508.25,577.34L510.78,581.89L512.44,583.78L512.62,584.96L518.49,593.44L520.68,597.09L523.5,598.96L523.14,597.34L528.55,597.98L533.86,601.72L536.52,604.03L535.08,605.69L533.61,605.72L532.33,607.37L531.08,610.35L527.4,614.42L526.29,616.66L524.67,617.58L522.80,623.09L522.23,627.69L521.43,628.74L521.01,632.45L519.09,635.59L519.13,637.37L517.53,639.91L517.92,643.46L516.63,644.81L515.14,644.39L513.68,645.75L512.73,648.14L511.41,648.01L510.28,649.51L510.51,653.50L508.87,653.83L505.95,656.98L505.83,659.50L502.88,660.73L501.44,663.57L499.46,663.74L496.50,664.68L492.12,658.82L488.94,655.61L487.11,654.45L483.97,653.75L481.02,655.12L479.22,656.62L475.57,654.29L473.60,655.50L469.32,656.29L466.56,660.16L465.12,664.47L462.83,667.01L459.21,668.52L454.91,668.85L452.09,667.10L450.43,666.52L448.62,667.57L447.63,667.28L444.80,663.75L443.14,662.58L441.65,662.44L438.85,663.64L435.55,662.92L431.92,663.09L428.78,662.51L425.81,662.96L422.34,662.68L421.85,663.13L419.20,662.25L414.75,663.74L412.27,663.74L410.46,665.97L406.83,667.15L406.50,667.75L401.71,667.60L398.57,665.08L396.58,665.97L394.60,665.08L393.12,663.30L388.66,663.00L387.67,664.48L384.37,664.32L383.21,664.77L381.73,663.73L380.90,664.61L379.09,662.98L375.95,662.23L373.64,662.66L372.65,663.40L369.67,663.53L366.86,664.85L364.22,663.65L358.95,662.73L357.62,663.02L355.63,664.78L351.00,665.64L345.55,666.04L343.07,665.72L338.78,665.83L334.66,664.90L331.83,666.94L330.31,670.18L328.30,672.38L325.94,676.50L323.77,677.96L320.62,678.36L318.95,679.68L316.57,684.38L313.92,684.64L312.74,685.81L309.09,686.36L300.67,684.16L297.52,684.11L294.86,684.81L289.33,688.42L287.51,688.24L285.50,689.24L283.85,689.21L282.00,690.51L280.00,691.07L278.48,692.22L276.83,692.19L273.60,695.83L271.50,701.72L269.98,702.58L267.72,707.57L266.19,709.16L264.78,713.43L264.39,715.94L263.39,716.07L261.75,715.00L260.95,713.50L257.95,713.73L256.75,715.33L256.85,718.15L258.19,717.74L258.17,718.92L256.67,718.74L257.48,719.79L256.61,721.70L257.76,722.32L257.40,723.35L254.86,725.22L253.20,724.88L251.00,726.32L246.62,728.29L244.28,728.68L241.20,724.75L237.90,723.34L236.55,724.05L233.75,722.79L231.45,721.25L230.43,722.11L228.33,719.69L226.57,716.83L224.79,714.71L221.87,712.11L219.71,711.90L216.53,712.56L214.72,711.76L213.04,712.16L209.88,706.29L209.27,704.35L207.52,701.78L205.37,701.42L202.58,694.67L199.99,692.37L198.80,688.04L195.37,680.97L193.94,679.00L195.91,679.66L197.31,682.51L196.79,683.39L197.56,685.33L199.53,685.99L200.57,684.24L202.08,683.84L203.63,681.82L203.67,680.63L201.70,679.98L200.98,681.74L199.31,682.13L197.54,680.59L199.04,680.20L200.16,676.23L198.88,674.71L197.05,675.10L196.12,672.85L194.51,671.47L191.72,670.78L190.53,671.64L187.78,669.92L187.82,668.59L184.57,661.82L184.46,660.18L186.47,659.36L190.53,656.23L190.07,655.18L188.13,654.08L184.95,645.39L183.85,643.58L180.54,639.17L175.10,634.55L165.64,627.85L160.17,624.54L157.41,623.55L156.79,622.63L154.20,621.50L151.35,618.87L151.30,620.06L153.21,621.76L148.53,619.36L144.21,616.52L140.65,615.35L139.97,615.76L134.74,615.26L125.54,615.46L123.22,615.96L118.04,618.10L115.46,616.81L114.86,611.89L113.92,610.82L114.85,608.49L113.51,605.32L113.51,601.62L114.05,600.60L114.01,597.64L112.44,596.09L113.64,594.96L112.86,594.18L112.96,591.82L112.22,590.16L112.60,588.84L111.34,587.90L110.63,585.35L109.49,585.30L108.63,582.59L109.8,582.20L109.19,581.14L110.20,580.44L111.12,578.12L113.91,574.24L114.60,569.54L116.90,565.5L116.62,564.45L118.61,563.65L119.98,562.08L124.36,558.86L127.50,553.82L127.42,551.89L129.47,549.61L130.08,546.67L129.19,544.57L130.38,543.28L131.82,543.79L133.67,542.39L135.57,543.50L139.51,542.48L138.95,540.24L141.27,539.00L143.50,539.98L143.61,541.31L145.05,541.96L146.55,540.98L148.16,541.2L148.25,538.83L149.08,538.42L149.42,533.85L150.40,533.74L151.69,529.65L150.92,528.73L152.14,526.41Z","c":[322.2,596.5]},{"id":"aragon","name":"Aragón","d":"M500.31,259.53L498.26,257.5L493.75,256.24L493.40,253.14L492.38,247.24L491.60,246.81L491.87,244L492.77,242.36L492.28,240.59L493.21,240.58L495.18,238.33L495.42,234.19L496.32,232.25L500.19,233.37L500.97,233.95L500.57,237.50L502.74,237.76L503.34,237.01L506.56,235.48L507.64,235.61L506.83,233.55L506.47,230.60L504.58,228.42L504.68,225.02L505.42,223.08L503.52,220.16L503.64,217.94L505.94,217.60L508.41,218.15L510.05,215.02L511.73,214.4L512.61,212.31L515.84,212.25L516.4,209.13L517.47,208.82L518.19,206.44L515.86,205.45L516.30,204.11L514.71,201.48L512.86,200.62L513.44,199.14L515.09,197.03L514.72,193.64L514.11,193.80L513.61,191.44L512.35,189.54L512.25,184.37L511.62,183.35L513.13,182.43L512.79,180.52L513.73,181.68L515.41,181.50L516.65,182.22L518.32,181.59L520.05,184.07L521.91,185.07L523.91,185.48L524.80,184.13L526.02,184.25L528.81,185.52L530.08,187.71L532.71,188.84L535.01,189.08L536.51,187.72L538.50,187.68L539.90,188.53L542.05,188.63L543.23,186.68L544.58,185.76L545.57,182.19L547.32,178.89L549.72,176.61L549.19,173.96L546.44,173.88L545.3,170.80L543.12,169.08L543.45,164.05L541.89,162.16L541.69,160.39L542.71,158.15L543.40,155.17L542.76,154.00L545.85,149.49L547.34,147.98L546.69,146.51L545.16,145.96L546.31,143.27L546.27,141.79L548.04,139.38L549.69,138.60L550.85,136.35L550.67,135.17L549.42,133.72L551.13,129.54L553.90,130.80L555.39,130.02L555.33,127.36L558.31,125.36L556.77,124.66L558.28,124.47L558.50,121.06L562.58,120.95L564.11,121.36L566.21,120.71L566.60,118.18L566.10,116.71L566.84,115.95L570.76,115.55L572.10,114.77L573.68,111.77L575.35,111.72L575.15,110.24L577.56,109.88L578.71,107.77L577.76,106.32L578.35,105.86L577.94,102.17L578.54,102.15L580.58,99.57L580.35,97.06L582.71,95.22L584.66,94.86L586.33,95.25L586.1,97.33L588.41,98.89L589.75,98.40L591.02,100.29L595.03,102.97L595.27,105.48L596.77,105.13L597.70,105.99L597.45,107.63L598.52,107.89L599.08,106.39L599.99,106.65L600.24,104.87L601.25,103.50L605.87,106.01L608.09,104.75L609.03,105.61L611.09,103.90L612.23,101.94L613.75,102.18L614.45,100.82L616.91,101.92L619.57,104.34L623.57,106.26L624.89,105.03L625.59,107.67L626.36,107.94L628.43,110.82L628.63,112L631.21,112.19L631.74,114.24L636.01,114.97L637.62,113.42L639.15,113.95L641.95,111.92L643.03,112.47L645.10,111.20L646.76,110.98L647.61,109.76L649.61,110.42L651.16,111.39L653.29,111.45L654.14,113.63L655.88,115.34L657.78,113.92L657.72,112.30L660.06,110.42L662.57,112.53L664.27,113.34L668.32,112.28L670.77,112.91L671.64,111.98L675.59,112.39L676.64,112.05L680.30,112.62L681.77,114.77L682.86,115.46L683.14,118.11L685.93,119.46L687.91,119.51L687.35,123.83L685.94,126.12L685.15,128.68L686.10,129.37L684.81,131.06L683.3,131.13L684.63,133.59L684.88,135.8L686.64,137.64L686.08,138.55L687.53,140.26L685.94,142.11L689.35,143.28L687.29,144.71L687.48,145.59L689.02,145.96L687.75,147.95L687.34,152.26L685.95,155.14L686.01,156.47L685.11,159.92L686.22,160.75L685.05,161.84L685.55,165.96L684.53,167.20L683.54,171.98L682.68,173.35L683.49,174.35L683.09,175.55L680.84,176.55L679.75,179.56L678.8,178.71L676.96,182.20L679.76,182.96L679.16,186.54L680.28,187.67L678.48,188.49L678.53,189.68L676.99,189.45L676.06,192.60L673.90,192.55L672.15,194.40L671.37,197.69L666.66,198.79L666.45,201.02L665.65,200.31L664.68,202.72L662.04,205.80L661.96,207.58L664.23,210.29L663.50,211.21L663.75,213.27L667.46,213.70L669.12,212.89L669.80,214.34L669.43,216.28L670.59,218.30L668.70,220.75L667.57,223.16L663.59,223.93L663.99,225.98L664.79,226.69L664.02,230.27L662.55,232.11L665.27,234.06L666.43,235.94L664.82,238.08L666.26,239.20L666.00,240.25L667.49,242.55L666.30,247.33L664.59,246.96L663.37,247.61L662.38,253.27L660.27,254.69L658.87,254.60L658.79,256.53L656.29,256.04L655.41,257.12L656.06,257.83L655.56,260.81L656.80,260.90L656.89,262.97L659.32,265.38L661.24,266.63L659.86,266.99L661.51,269.43L661.76,271.49L661.25,274.18L660.35,274.95L658.96,279.01L660.09,279.99L659.85,281.63L662.00,284.65L660.53,286.63L659.02,287.88L658.79,289.66L657.54,289.71L656.05,291.40L655.10,291.00L654.87,293.08L653.06,294.48L651.00,293.68L648.08,294.98L646.15,297.28L645.04,296.88L645.12,295.10L644.14,293.96L641.48,293.76L640.89,294.53L638.54,294.17L634.08,291.98L632.61,290.11L632.73,289.07L629.31,289.5L627.39,292.23L626.42,295.52L626.82,298.02L625.73,298.06L621.30,300.73L620.46,299.13L618.44,299.50L616.78,301.04L617.59,301.90L617.06,304.43L621.18,306.21L623.02,305.25L623.04,309.98L623.56,311.59L622.85,313.54L624.66,315.84L624.89,317.90L620.72,319.53L619.98,320.89L620.98,322.48L622.75,323.89L624.07,325.62L624.61,327.67L622.60,328.48L619.14,332.45L616.7,334.46L618.01,336.18L617.90,337.37L613.28,340.19L612.01,339.79L610.32,340.88L608.09,340.07L606.80,338.93L605.73,344.59L604.97,345.35L605.20,347.71L604.17,349.96L602.77,350.30L601.27,352.71L602.47,355.63L601.83,355.21L600.12,356.00L598.91,357.52L596.24,357.90L595.16,358.67L592.17,358.77L591.79,361.59L590.27,363.41L587.30,364.38L586.60,367.36L587.81,371.02L590.09,373.32L588.07,374.27L585.29,376.57L583.86,376.16L582.24,374.73L582.96,372.5L581.79,370.16L582.36,368.08L581.35,365.89L580.43,366.66L578.02,365.10L575.48,364.58L573.92,365.21L571.70,364.68L568.25,365.37L566.86,366.44L565.73,365.73L564.06,362.23L566.10,361.73L569.67,359.71L570.40,357.48L567.65,354.74L566.06,354.19L564.28,352.61L560.68,353.15L558.78,352.90L557.82,352.04L557.62,350.27L555.35,347.67L554.34,345.18L553.39,344.76L552.65,346.55L552.89,350.1L550.57,351.63L549.77,350.91L547.89,351.25L543.93,350.31L544.22,349.27L544.45,345.57L541.97,346.81L539.41,345.09L537.40,346.32L535.15,344.30L533.69,342.26L532.58,341.69L528.90,338.22L528.40,337.05L526.81,335.75L526.03,335.92L525.14,338.74L524.00,336.55L526.17,335.03L524.40,332.85L522.97,332.13L520.55,328.34L518.50,327.79L518.78,326.30L519.88,326.43L522.30,321.80L526.17,319.51L525.44,314.50L526.33,312.26L526.00,311.24L527.22,309.88L527.86,310.75L530.05,310.86L532.59,312.43L536.27,309.39L534.83,307.65L536.61,303.62L536.71,300.96L535.09,298.04L534.73,296.12L536.25,294.17L535.83,289.15L534.09,288.01L530.41,283.36L530.07,281.74L531.25,279.05L527.43,274.55L523.64,271.38L520.63,268.33L519.82,266.57L517.45,264.55L513.55,263.29L511.02,260.53L508.54,260.28L507.41,257.64L506.62,257.21L503.24,258.74L500.46,259.09ZM562.38,136.05L560.65,139.35L565.24,140.41L565.82,139.36L564.55,137.47ZM559.29,139.83L557.06,141.52L556.96,143.59L558.91,142.36Z","c":[594.7,223.7]},{"id":"asturias","name":"Principado de Asturias","d":"M165.93,36.22L166.12,35.19L169.85,35.34L171.55,33.92L173.93,34.01L176.44,35.00L176.75,34.56L179.58,34.82L180.74,35.90L182.39,35.81L183.62,34.67L184.19,35.43L185.85,35.20L186.42,35.96L187.49,35.26L189.11,35.91L190.78,35.08L192.87,35.00L195.36,36.57L195.97,36.30L199.68,37.02L203.12,36.98L203.33,35.21L205.96,36.93L208.22,36.41L209.84,37.21L212.40,36.40L214.20,36.31L218.45,33.92L220.95,35.48L222.00,35.07L221.82,36.25L223.17,35.99L227.01,37.44L230.03,36.49L233.06,34.80L233.80,35.26L237.23,35.51L238.45,34.65L238.02,33.90L240.29,32.78L240.32,31.45L242.11,31.64L244.09,30.06L244.13,28.58L245.17,28.61L246.18,30.27L248.99,31.08L248.50,32.55L250.82,35.57L252.14,36.34L254.37,36.99L254.77,38.93L257.89,39.45L259.87,38.01L261.04,38.93L266.42,38.76L267.90,39.38L269.71,38.83L273.45,38.62L275.20,40.43L280.88,40.55L283.09,42.07L282.92,42.96L285.72,45.09L286.45,46.29L292.14,45.50L293.03,46.11L294.97,46.30L296.00,47.20L299.88,48.01L302.43,47.61L304.97,47.95L308.39,49.04L309.28,49.64L311.23,49.38L312.41,50.28L316.29,50.93L317.77,51.99L321.96,52.79L323.74,53.55L328.68,53.91L329.42,54.51L330.93,53.79L333.02,54.40L333.15,55.44L331.64,56.75L331.46,58.97L332.36,59.43L332.30,64.75L331.24,65.78L330.50,64.29L326.62,63.21L324.64,65.25L324.93,65.85L320.13,65.93L318.47,66.80L319.04,69.18L317.96,71.09L318.08,73.01L316.72,73.44L315.08,72.67L312.06,73.81L310.86,73.65L311.03,72.76L309.70,71.26L308.98,69.18L307.34,68.26L305.67,69.27L304.17,69.40L300.51,73.04L300.48,74.37L298.85,73.16L297.65,72.99L296.28,74.00L295.24,73.54L295.22,74.57L293.98,76.62L293.31,80.46L290.75,80.41L290.32,79.22L288.95,80.38L287.59,80.65L285.46,82.09L282.16,81.58L281.23,82.60L279.29,81.82L277.33,81.93L277.20,80.89L274.49,81.42L273.96,84.96L270.06,84.29L267.95,84.39L266.98,87.33L266.24,86.72L263.96,87.56L262.16,87.22L261.58,86.32L257.97,86.08L254.11,83.77L251.37,85.03L250.87,86.95L248.68,90.15L249.10,91.34L246.06,92.30L243.50,92.09L242.34,90.43L240.53,90.53L240.57,89.19L239.35,89.46L237.6,87.63L236.11,87.00L235.26,84.76L235.74,83.73L235.02,82.53L232.14,83.49L227.83,81.29L227.06,82.16L226.66,85.40L223.93,86.21L223.06,85.00L220.54,83.59L218.73,83.68L217.75,86.02L217.87,87.21L215.48,86.54L214.18,84.73L213.40,85.44L211.16,84.93L211.04,83.89L209.28,82.50L208.18,83.95L206.66,84.19L206.75,86.12L205.54,86.23L205.8,87.72L203.19,89.11L201.11,88.15L201.63,90.54L203.88,90.91L203.39,92.23L203.96,93.13L200.93,93.48L199.98,94.78L198.65,93.99L196.49,95.40L193.95,94.72L192.13,94.81L191.86,94.06L186.57,94.16L184.44,94.53L182.07,97.55L180.86,97.51L181.07,96.04L177.66,94.43L176.49,93.20L176.9,90.55L174.00,87.33L172.19,87.41L170.16,85.26L169.78,83.32L168.56,83.87L168.58,87.13L166.43,84.38L167.41,82.49L168.12,83.55L168.37,81.05L169.63,79.47L171.61,78.95L172.03,79.71L173.45,78.13L175.10,78.2L175.44,77.32L178.07,75.35L178.58,73.59L177.46,71.47L175.13,69.46L174.28,72.09L173.22,72.20L170.74,74.18L169.39,73.98L168.01,70.96L169.14,68.93L168.74,67.58L166.80,67.21L166.26,65.71L165.62,66.57L162.89,63.65L162.37,61.56L162.94,58.47L160.41,58.07L159.59,55.96L158.56,55.63L159.01,51.79L158.31,50.73L156.92,51.56L155.76,50.77L156.30,48.42L156.24,46.35L158.18,46.43L159.21,47.06L161.19,46.25L161.71,44.35L164.78,42.4L164.90,39.59Z","c":[234.2,61.6]},{"id":"baleares","name":"Illes Balears","d":"M752.13,467.68L750.96,466.71L751.22,465.66ZM749.95,457.14L749.55,458.64L749.92,462.47L748.27,461.67L747.53,462.75L746.58,460.14L745.25,459.18L742.55,459.77L742.02,458.91L739.78,458.88L738.44,460.87L735.84,457.31L737.23,453.24L735.71,451.84L736.94,450.74L739.17,450.62L742.18,450.02L740.46,447.74L740.81,445.36L742.15,443.51L745.51,440.51L746.53,441.64L747.25,440.12L749.48,440.00L750.04,438.63L751.06,439.61L751.93,438.09L754.95,437.77L755.52,436.55L757.40,435.85L759.28,437.97L761.66,437.54L763.03,439.23L761.78,439.60L762.21,441.65L763.88,442.89L761.61,445.09L761.58,447.46L759.49,447.28L758.12,448.54L758.14,451.65L756.69,451.58L756.45,452.93L754.47,454.82L751.89,454.67L751.81,456.00L750.68,455.92ZM749.60,479.96L748.86,475.26L749.34,475.23L748.57,472.91L749.79,471.80L751.27,472.46L752.37,469.00L753.47,471.45L755.14,472.54L756.73,475.12L759.55,476.59L761.69,474.69L763.21,475.94L762.70,478.33L759.33,478.38L755.65,475.92L753.23,475.91L752.36,477.58ZM809.50,391.08L809.60,390.19L811.56,388.58L810.42,390.58ZM830.22,391.92L829.68,393.29L827.63,393.57L826.14,395.01L826.32,397.66L825.56,400.53L823.95,400.34L820.52,396.57L821.22,395.19L820.00,393.64L817.71,394.98L817.96,393.93L816.68,393.87L815.51,395.42L813.88,392.42L812.40,391.63L812.95,390.41L812.11,389.58L812.78,387.76L814.80,387.03L817.19,384.80L820.09,383.12L822.42,380.00L824.52,378.23L826.27,378.26L828.22,376.65L830.70,373.52L831.55,371.98L833.53,370.80L833.74,369.31L834.97,368.78L835.82,367.38L838.53,365.27L839.03,365.68L840.84,364.37L840.61,363.35L842.81,363.19L846.13,360.88L847.53,360.48L849.59,358.41L851.61,357.82L852.60,356.27L855.2,357.11L857.84,354.40L860.23,354.52L859.82,355.44L864.33,354.37L866.06,352.16L867.28,351.63L868.43,352.13L870.72,351.07L870.06,352.75L868.68,353.30L866.74,354.93L865.15,354.75L863.72,356.78L862.41,356.29L861.78,358.41L862.72,360.41L864.19,361.04L865.69,359.90L866.35,360.29L869.77,357.37L870.44,357.76L869.30,359.48L870.03,360.76L869.04,362.31L865,363.36L865.19,366.01L867.80,369.07L872.08,371.12L875.16,372.07L879.85,369.05L880.46,366.63L881.21,366.13L883.58,368.02L885.32,368.03L887.51,369.64L889.24,369.51L889.10,371.74L890.68,371.62L889.53,373.19L889.73,377.77L888.63,377.85L888.47,379.94L886.70,379.63L885.57,381.50L885.30,384.19L886.49,385.13L884.92,385.40L884.30,387.68L882.47,388.71L879.60,392.78L878.87,395.65L878.76,400.55L877.44,401.98L877.22,403.33L875.52,406.13L874.68,405.60L873.14,408.39L872.08,409.21L870.31,409.04L868.53,410.80L865.49,415.03L863.92,415.44L863.19,414.16L861.51,412.95L860.41,411.11L858.98,411.21L859.32,409.26L857.27,407.34L854.85,407.07L853.32,407.92L851.35,407.17L848.66,407.36L847.77,408.32L845.95,407.41L844.87,407.93L841.97,405.17L841.03,403.16L841.54,401.35L839.39,397.95L841.26,395.15L839.34,392.76L836.52,391.04L832.46,389.84L832.13,391.93ZM857.55,428.80L855.03,427.20L855.75,426.11L857.55,426.58L857.29,425.26L859.39,425.55L858.18,426.53L858.32,428.45ZM937.40,355.46L933.12,353.61L931.58,352.26L927.28,350.10L926.84,350.43L922.76,349.00L918.64,350.83L913.45,351.26L913.39,348.59L914.11,347.79L913.22,344.60L910.98,344.34L910.68,342.59L911.86,341.60L912.49,339.62L914.65,339.00L916.40,339.15L917.75,338.30L918.62,339.26L919.35,338.46L921.98,337.8L922.67,338.48L926.39,337.72L927.13,337.06L928.33,338.15L930.87,336.45L932.15,338.56L934.20,336.61L933.62,339.03L934.75,339.38L934.33,336.30L936.43,336.86L936.09,338.37L937.82,340.15L938.19,338.93L940.68,342.13L942.54,341.67L943.36,342.04L943.46,345.00L945.50,346.60L945.12,347.67L945.92,349.53L947.45,350.73L947.92,352.47L946.79,352.27L947.87,353.66L948,355.14L947.42,357.56L945.80,359.04L943.53,358.49L939.42,356.77Z","c":[841.9,408.1]},{"id":"cantabria","name":"Cantabria","d":"M310.86,73.65L312.06,73.81L315.08,72.67L316.72,73.44L318.08,73.01L317.96,71.09L319.04,69.18L318.47,66.80L320.13,65.93L324.93,65.85L324.64,65.25L326.62,63.21L330.50,64.29L331.24,65.78L332.30,64.75L332.36,59.43L331.46,58.97L331.64,56.75L333.15,55.44L333.02,54.40L334.52,54.12L335.71,54.73L337.66,54.01L342.45,54.50L344.70,53.49L345.29,54.68L348.58,55.00L351.74,53.99L352.78,54.30L359.83,52.28L361.79,50.51L362.08,51.26L365.68,50.24L367.33,50.40L370.03,48.93L370.93,47.75L375.57,46.74L376.32,47.19L379.76,45.42L381.56,45.73L382.45,47.95L379.90,48.98L379.44,50.75L380.34,51.79L379.44,53.42L381.84,51.94L381.09,51.35L382.59,49.73L384.24,49.73L382.14,48.69L384.99,48.70L386.79,46.92L388.43,46.93L390.83,45.16L393.07,45.01L394.12,43.83L395.31,44.42L397.25,44.13L397.85,45.61L399.65,45.76L399.65,47.09L402.34,48.12L405.03,48.42L405.48,50.05L403.09,50.64L402.79,53.75L403.83,50.94L405.63,53.01L409.07,52.56L409.37,53.15L412.07,52.70L415.36,53.88L416.71,53.88L419.11,54.76L419.71,56.38L420.76,56.68L423.02,58.59L423.62,58.44L423.78,61.55L423.33,63.18L420.94,63.48L419.89,64.82L416.14,63.65L414.34,64.24L414.19,63.21L412.24,63.95L410.89,63.81L411.19,65.28L408.34,66.03L407.15,68.25L403.85,69.14L404.90,71.95L404.90,74.32L405.96,78.61L399.94,78.32L397.54,77.28L394.83,76.69L393.63,77.13L393.03,75.35L390.48,74.31L388.67,76.68L388.22,78.30L386.86,79.93L385.20,81.26L383.40,81.55L383.24,82.88L381.13,83.61L379.78,82.87L377.22,83.01L378.27,84.93L377.06,87.00L374.50,86.84L373.13,89.20L370.72,90.08L369.20,92.14L367.67,97.02L368.72,98.80L371.88,99.56L372.04,98.52L374.30,97.64L374.46,95.42L375.82,94.84L378.38,97.22L377.77,98.40L376.86,98.10L375.80,100.02L373.69,99.56L374.14,101.05L372.77,103.70L375.03,104.45L375.78,103.86L375.34,102.23L376.10,100.91L378.66,102.84L378.05,104.32L379.25,105.80L378.78,109.20L376.06,110.37L373.95,108.59L372.89,110.36L372.88,111.99L371.52,111.39L370.46,112.57L368.34,112.85L366.83,111.81L367.14,110.33L366.71,106.19L365.50,107.21L365.94,108.40L363.97,110.02L363.81,112.09L361.38,112.52L360.34,109.85L358.53,109.54L356.72,109.97L354.47,107.44L356.3,105.53L357.20,106.27L358.42,103.77L356.92,102.42L353.58,104.91L351.94,103.13L351.07,98.24L350.95,94.83L349.45,93.78L343.73,93.14L341.94,91.05L340.32,87.34L338.07,86.28L336.13,84.92L335.20,86.99L332.20,86.06L329.61,88.70L326.47,87.18L324.19,88.78L321.19,87.85L319.07,88.56L317.28,87.80L317.90,85.88L315.81,85.11L315.68,83.34L311.36,80.76L310.19,78.52L311.28,75.72L310.25,74.38ZM354.78,106.85L354.78,106.85L354.78,106.85ZM360.96,108.22L359.76,106.44L359.30,107.47L360.04,109.55ZM415.40,66.61L417.20,67.05L417.05,68.23L415.85,69.42L416.16,71.93L414.81,72.68L414.06,71.94L414.20,68.53L413.60,67.20Z","c":[364.9,72.6]},{"id":"cyl","name":"Castilla y León","d":"M163.42,180.32L163.02,178.97L165.30,175.36L164.49,172.67L162.19,172.87L160.70,171.78L160.59,170.74L162.61,169.93L163.42,168.63L163.66,166.57L166.46,165.35L167.36,161.68L170.00,160.60L171,158.42L173.17,157.32L174.85,157.38L177.70,158.52L176.72,156.26L177.53,155.11L179.22,154.73L179.42,153.40L181.18,151.10L181.84,145.50L179.58,144.83L179.17,143.63L176.00,142.92L174.55,140.94L176.45,139.09L176.24,136.56L177.2,135.27L175.31,132.83L174.52,133.54L170.06,131.15L169.48,130.39L167.05,130.44L166.05,132.62L163.97,131.51L162.43,132.04L160.8,131.08L159.42,131.18L160.42,129.00L159.69,128.23L160.70,125.90L162.44,124.19L161.28,122.81L161.70,119.72L163.72,118.62L163.94,116.85L161.93,113.96L164.15,111.53L165.82,111.30L166.25,112.06L168.2,108.73L169.50,110.11L171.84,108.28L172.66,106.83L174.20,106.00L174.41,104.52L176.13,102.81L174.35,98.16L176.32,97.79L177.65,98.72L176.86,95.44L177.66,94.43L181.07,96.04L180.86,97.51L182.07,97.55L184.44,94.53L186.57,94.16L191.86,94.06L192.13,94.81L193.95,94.72L196.49,95.40L198.65,93.99L199.98,94.78L200.93,93.48L203.96,93.13L203.39,92.23L203.88,90.91L201.63,90.54L201.11,88.15L203.19,89.11L205.8,87.72L205.54,86.23L206.75,86.12L206.66,84.19L208.18,83.95L209.28,82.50L211.04,83.89L211.16,84.93L213.40,85.44L214.18,84.73L215.48,86.54L217.87,87.21L217.75,86.02L218.73,83.68L220.54,83.59L223.06,85.00L223.93,86.21L226.66,85.40L227.06,82.16L227.83,81.29L232.14,83.49L235.02,82.53L235.74,83.73L235.26,84.76L236.11,87.00L237.6,87.63L239.35,89.46L240.57,89.19L240.53,90.53L242.34,90.43L243.50,92.09L246.06,92.30L249.10,91.34L248.68,90.15L250.87,86.95L251.37,85.03L254.11,83.77L257.97,86.08L261.58,86.32L262.16,87.22L263.96,87.56L266.24,86.72L266.98,87.33L267.95,84.39L270.06,84.29L273.96,84.96L274.49,81.42L277.20,80.89L277.33,81.93L279.29,81.82L281.23,82.60L282.16,81.58L285.46,82.09L287.59,80.65L288.95,80.38L290.32,79.22L290.75,80.41L293.31,80.46L293.98,76.62L295.22,74.57L295.24,73.54L296.28,74.00L297.65,72.99L298.85,73.16L300.48,74.37L300.51,73.04L304.17,69.40L305.67,69.27L307.34,68.26L308.98,69.18L309.70,71.26L311.03,72.76L310.86,73.65L310.25,74.38L311.28,75.72L310.19,78.52L311.36,80.76L315.68,83.34L315.81,85.11L317.90,85.88L317.28,87.80L319.07,88.56L321.19,87.85L324.19,88.78L326.47,87.18L329.61,88.70L332.20,86.06L335.20,86.99L336.13,84.92L338.07,86.28L340.32,87.34L341.94,91.05L343.73,93.14L349.45,93.78L350.95,94.83L351.07,98.24L351.94,103.13L353.58,104.91L356.92,102.42L358.42,103.77L357.20,106.27L356.3,105.53L354.47,107.44L356.72,109.97L358.53,109.54L360.34,109.85L361.38,112.52L363.81,112.09L363.97,110.02L365.94,108.40L365.50,107.21L366.71,106.19L367.14,110.33L366.83,111.81L368.34,112.85L370.46,112.57L371.52,111.39L372.88,111.99L372.89,110.36L373.95,108.59L376.06,110.37L378.78,109.20L379.25,105.80L378.05,104.32L378.66,102.84L376.10,100.91L375.34,102.23L375.78,103.86L375.03,104.45L372.77,103.70L374.14,101.05L373.69,99.56L375.80,100.02L376.86,98.10L377.77,98.40L378.38,97.22L375.82,94.84L374.46,95.42L374.30,97.64L372.04,98.52L371.88,99.56L368.72,98.80L367.67,97.02L369.20,92.14L370.72,90.08L373.13,89.20L374.50,86.84L377.06,87.00L378.27,84.93L377.22,83.01L379.78,82.87L381.13,83.61L383.24,82.88L383.40,81.55L385.20,81.26L386.86,79.93L388.22,78.30L388.67,76.68L390.48,74.31L393.03,75.35L393.63,77.13L394.83,76.69L397.54,77.28L399.94,78.32L405.96,78.61L409.11,76.98L410.61,76.68L411.06,75.50L413.01,75.05L415.26,72.97L416.91,72.52L419.02,75.03L419.92,74.29L421.43,75.32L422.63,74.43L424.43,75.61L423.09,76.65L423.09,77.68L421.74,79.76L424.91,81.82L423.41,84.04L424.47,84.48L424.33,88.18L422.53,88.04L422.08,88.78L424.34,90.11L427.96,90.68L428.86,89.94L431.43,92.29L430.99,93.18L432.95,94.95L434.31,95.09L435.22,96.27L433.27,97.91L432.83,99.09L428.00,100.00L426.94,98.97L425.59,99.57L423.92,98.10L424.37,96.77L421.95,95.89L418.94,95.45L417.29,98.86L415.48,99.75L415.03,102.12L418.21,105.66L420.02,105.07L421.22,102.7L422.43,103.87L423.94,103.42L425.59,100.75L426.95,101.78L426.51,103.41L423.36,108.60L425.33,110.08L424.88,112.30L424.13,113.04L426.25,112.74L427.45,111.99L429.88,112.72L430.93,112.27L431.40,114.63L432.91,114.48L433.67,116.10L434.89,116.39L435.50,117.87L437.01,117.27L438.83,117.40L438.83,118.14L440.65,118.72L441.27,120.05L441.13,122.27L443.71,123.73L442.06,125.37L440.54,124.93L439.33,125.39L438.57,124.21L436.14,123.63L435.54,124.08L433.87,123.35L432.96,124.39L431.44,123.66L428.57,123.67L428.42,124.86L429.48,125.44L430.10,127.07L429.65,128.40L427.09,131.67L425.12,132.71L426.94,133.88L428.15,132.99L429.37,134.02L428.93,136.54L427.87,137.28L429.24,138.61L431.08,141.56L430.03,143.34L429.88,145.26L430.66,148.06L429.90,148.07L428.67,145.86L428.97,144.23L427.45,144.09L427.76,145.27L427.15,146.90L428.52,147.04L430.05,149.10L429.75,149.84L426.86,150.15L426.87,151.34L427.79,152.37L427.18,153.55L428.27,157.24L427.66,158.28L428.43,159.76L427.37,161.09L427.38,162.87L425.70,163.91L426.63,165.98L428.31,167.74L428.63,169.96L430.00,170.10L432.16,174.38L437.05,174.50L438.88,174.04L440.29,178.77L440.30,180.10L442.45,181.41L444.27,179.63L448.23,177.82L448.64,172.20L449.70,170.86L451.39,171.44L452.45,170.69L454.30,172.45L454.31,174.22L450.99,179.13L451.78,181.34L454.52,180.73L456.68,182.33L457.59,181.58L459.88,181.41L463.11,182.42L464.01,180.78L464.89,177.81L467.47,175.72L466.84,174.39L467.42,171.58L469.41,172.29L471.24,171.39L472.59,169.30L475.94,168.82L480.67,168.61L483.12,169.76L483.15,171.68L484.1,173.74L486.22,172.37L490.64,172.01L493.70,172.71L493.73,174.33L491.46,175.55L491.94,177.32L494.58,179.64L495.22,181.41L494.00,182.02L494.66,184.97L495.74,185.69L498.35,185.79L500.05,186.95L500.64,185.76L503.91,188.96L508.33,187.55L508.92,186.35L510.90,185.73L512.25,184.37L512.35,189.54L513.61,191.44L514.11,193.80L514.72,193.64L515.09,197.03L513.44,199.14L512.86,200.62L514.71,201.48L516.30,204.11L515.86,205.45L518.19,206.44L517.47,208.82L516.4,209.13L515.84,212.25L512.61,212.31L511.73,214.4L510.05,215.02L508.41,218.15L505.94,217.60L503.64,217.94L503.52,220.16L505.42,223.08L504.68,225.02L504.58,228.42L506.47,230.60L506.83,233.55L507.64,235.61L506.56,235.48L503.34,237.01L502.74,237.76L500.57,237.50L500.97,233.95L500.19,233.37L496.32,232.25L495.42,234.19L495.18,238.33L493.21,240.58L492.28,240.59L492.77,242.36L491.87,244L491.60,246.81L492.38,247.24L493.40,253.14L493.75,256.24L498.26,257.5L500.31,259.53L500.34,261.60L499.30,264.28L500.57,265.88L499.96,266.63L495.73,263.74L494.93,262.42L494.02,263.77L492.33,264.39L491.88,265.57L487.83,264.30L485.70,267.14L483.68,266.73L481.68,268.08L479.47,265.45L476.24,267.71L475.01,268.17L474.21,266.85L471.57,266.29L470.60,262.75L468.74,262.62L468.09,259.97L466.84,258.65L466.69,259.4L464.22,260.75L462.82,259.88L464.03,257.21L462.32,256.34L461.09,256.79L461.07,255.61L462.93,255.00L463.06,252.93L460.44,253.84L459.18,251.64L457.63,251.95L454.84,250.50L454.35,248.43L451.26,248.61L450.35,250.83L447.25,250.12L443.99,248.51L443.35,244.23L441.18,243.80L438.87,245.00L438.72,246.48L434.40,247.69L433.63,247.25L430.54,248.74L427.44,247.43L420.64,245.97L418.48,247.46L417.40,250.12L416.01,249.98L415.85,248.65L414.77,250.28L412.45,249.84L411.68,250.73L409.52,249.99L407.35,250.59L406.89,252.51L407.20,254.28L404.41,254.14L402.87,257.09L400.54,257.54L399.15,259.01L397.76,258.72L393.57,259.60L391.25,261.52L390.00,264.03L388.14,266.09L385.66,267.12L383.95,268.89L382.85,271.25L381.14,273.76L379.11,274.94L374.3,276.10L372.27,277.87L371.32,280.23L369.29,283.47L369.91,283.91L369.58,286.28L368.33,288.93L368.48,289.96L367.22,292.17L367.21,293.50L365.66,293.05L364.41,293.78L360.99,292.58L359.10,295.23L359.09,296.71L358.15,297.14L356.42,299.5L355.78,301.56L353.90,302.88L354.19,305.39L353.71,307.46L354.64,308.05L350.88,309.65L347.60,309.77L347.00,307.55L345.75,307.69L345.73,309.61L346.35,309.76L345.7,313.45L343.18,314.76L343.48,316.38L343.25,323.92L341.99,325.09L342.59,327.75L336.80,327.55L334.90,329.45L335.02,332.85L333.44,333.87L333.89,335.79L330.44,336.05L328.90,333.37L327.48,333.80L328.69,338.10L325.83,341.17L326.59,343.4L326.10,344.87L325.15,345.00L322.46,346.6L320.89,346.72L317.61,345.50L317.65,341.95L316.72,341.20L316.91,338.99L314.70,339.99L313.76,339.54L312.49,340.85L309.52,339.47L308.56,341.23L309.31,343.17L306.92,345.49L304.55,346.35L300.90,348.95L301.34,350.58L300.85,352.05L298.48,352.60L297.68,353.33L295.15,354.32L294.44,349.88L290.97,350.55L288.57,352.73L285.52,355.92L281.57,356.74L280.83,354.51L276.90,353.84L273.44,354.21L272.03,353.44L269.93,348.97L270.27,347.64L269.87,344.24L270.67,343.37L271.84,339.84L268.05,340.95L265.86,340.75L265.04,342.51L263.13,343.35L262.78,344.82L258.67,345.91L254.17,343.74L253.07,343.86L252.19,340.88L250.47,340.69L250.05,338.76L247.58,336.78L244.45,336.41L242.54,337.69L240.51,337.05L239.91,336.00L241.36,334.70L240.51,331.13L239.10,331.10L236.85,333.11L236.72,332.22L233.53,333.91L232.85,336.11L231.56,337.25L230.46,337.22L225.82,334.88L224.76,333.37L225.12,331.75L222.46,331.53L219.52,330.11L220.32,329.69L220.21,328.21L221.67,326.33L217.50,324.14L218.19,322.24L216.14,322.62L215.73,320.69L214.18,320.20L212.67,318.23L209.86,318.00L208.88,319.30L206.01,320.98L203.34,321.19L201.07,323.49L200.22,325.53L197.25,325.43L195.76,327.75L194.03,327.84L188.95,329.89L187.16,331.60L186.80,332.92L187.36,335.01L185.10,336.85L179.12,337.23L177.79,339.11L175.99,336.68L173.25,338.65L171.54,338.29L170.10,338.83L167.62,338.14L165.81,336.15L165.89,333.79L169.13,331.25L171.20,330.44L170.96,328.51L171.92,327.80L169.21,324.75L168.02,323.07L167.37,319.65L170.21,314.88L171.33,314.33L170.80,311.64L171.14,310.77L168.08,309.18L168.64,306.68L169.95,305.11L171.99,300.60L170.75,296.26L171.08,295.54L169.77,293.12L170.23,289.15L170.89,288.14L170.59,283.69L172.16,283.45L171.65,280.33L169.66,279.51L169.07,278.46L169.15,276.54L168.46,274.00L167.41,273.07L165.22,269.44L164.30,269.11L163.78,266.57L164.58,265.86L168.11,267.03L170.44,266.97L172.17,266.30L176.28,260.24L175.10,258.42L175.45,257.40L179.60,254.00L180.75,252.27L180.80,250.94L184.02,247.35L185.24,247.84L188.21,247.06L188.33,248.10L190.66,247.73L191.01,246.71L193.07,245.15L194.28,246.08L195.71,245.09L194.96,244.33L196.55,242.91L197.78,243.09L200.25,238.74L201.79,238.64L203.06,237.65L201.86,236.72L202.05,235.54L203.78,234.71L204.66,236.07L207.31,235.12L206.13,233.60L208.83,231.03L208.10,229.67L209.38,228.24L209.73,227.06L212.10,225.07L211.52,224.01L213.08,223.32L214.88,219.83L216.46,218.55L215.15,216.29L213.32,215.49L212.17,213.09L209.02,210.33L205.38,208.88L204.14,208.99L202.01,208.33L198.78,208.23L198.43,209.54L196.26,210.21L194.58,209.86L192.19,207.56L192.71,205.95L191.90,202.67L191.00,202.19L191.96,200.9L192.69,197.67L194.93,190.35L191.28,189.48L193.12,185.11L193.00,183.92L190.48,181.61L189.65,183.36L182.72,184.59L179.24,183.43L178.15,179.69L175.27,178.85L175.35,180.92L174.50,183.11L172.65,183.34L171.14,182.69L170.20,183.39L166.08,182.94L165.25,180.69ZM343.89,305.75L347.95,305.49L348.11,304.60L346.10,302.81L343.91,304.12ZM360.96,108.22L360.04,109.55L359.30,107.47L359.76,106.44ZM354.78,106.85L354.78,106.85L354.78,106.85ZM438.88,126.28L439.34,127.31L438.29,127.91ZM435.09,126.00L435.09,126.00L435.09,126.00ZM443.19,114.12L443.95,113.82L443.93,111.89L445.12,109.37L445.73,110.40L447.99,109.5L452.07,109.46L454.66,110.92L455.71,110.76L458.75,112.06L460.71,111.60L461.79,113.36L463.74,112.16L462.87,115.72L460.48,118.41L461.39,118.84L462.47,120.75L464.59,120.73L465.18,119.10L466.24,119.38L466.73,122.78L464.47,123.69L462.18,122.38L458.70,122.71L457.47,120.80L454.44,120.39L453.09,121.58L449.75,121.17L448.67,118.22L445.94,117.35L445.63,116.32L443.81,115.44Z","c":[312.4,204.6]},{"id":"clm","name":"Castilla-La Mancha","d":"M290.12,480.60L294.15,479.63L295.47,477.73L296.31,475.09L296.85,471.55L297.69,469.20L299.82,466.27L303.18,466.33L304.46,466.94L305.32,462.37L304.39,460.88L302.47,460.70L300.41,459.34L299.60,459.92L298.51,458.12L296.56,450.55L298.63,450.74L302.11,452.86L303.86,453.18L304.68,451.87L305.80,451.88L306.31,450.26L303.93,448.90L303.00,447.26L304.15,444.76L304.51,442.11L306.13,440.80L307.61,437.87L310.14,438.79L312.38,438.38L314.45,439.00L317.14,440.66L319.04,441.13L317.95,439.19L314.79,436.94L314.52,433.83L313.26,432.78L311.27,426.84L315.10,426.15L314.80,424.52L317.92,417.47L316.36,414.94L314.75,416.39L311.87,418.13L310.90,419.44L308.19,419.70L303.54,422.29L300.85,421.36L299.13,419.85L298.01,419.98L293.94,416.07L290.54,410.99L288.79,410.96L285.99,407.95L284.45,405.41L280.56,401.50L280.25,400.75L283.50,396.82L284.22,391.96L285.20,390.35L282.73,387.06L283.85,386.19L283.29,382.63L280.60,382.73L277.86,385.48L277.20,386.65L273.26,385.98L272.86,382.58L273.56,379.04L275.34,377.16L274.58,375.52L272.40,373.85L269.24,374.08L266.69,375.06L267.56,371.38L269.74,365.52L270.11,362.72L269.25,358.56L269.80,354.73L272.03,353.44L273.44,354.21L276.90,353.84L280.83,354.51L281.57,356.74L285.52,355.92L288.57,352.73L290.97,350.55L294.44,349.88L295.15,354.32L297.68,353.33L298.48,352.60L300.85,352.05L301.34,350.58L300.90,348.95L304.55,346.35L306.92,345.49L309.31,343.17L308.56,341.23L309.52,339.47L312.49,340.85L313.76,339.54L314.70,339.99L316.91,338.99L316.72,341.20L317.65,341.95L317.61,345.50L320.89,346.72L322.46,346.6L325.15,345.00L325.46,345.89L328.12,346.66L329.39,345.20L332.55,343.76L334.28,343.63L335.23,342.61L335.25,341.28L338.88,338.51L339.22,336.14L340.78,336.75L340.75,340.30L341.67,342.97L343.07,344.31L343.86,343.58L344.94,345.06L346.69,343.45L348.44,340.07L351.42,340.54L351.43,338.76L353.01,338.33L353.93,340.11L355.50,341.01L355.02,342.34L358.31,343.10L360.05,340.75L361.93,342.24L363.97,342.40L363.80,343.58L366.14,346.10L368.81,345.82L368.96,347.89L370.38,346.57L371.48,347.76L374.93,348.07L375.87,349.84L377.12,350.44L379.49,349.27L381.52,352.52L383.25,353.27L385.14,351.79L387.65,353.13L388.75,352.25L389.54,353.87L392.99,355.36L392.83,357.87L391.89,360.38L390.78,360.67L389.84,362.44L389.05,362.00L387.94,363.77L386.53,363.47L384.63,366.27L383.21,367.16L383.99,368.78L382.42,368.19L380.36,369.51L380.36,370.40L378.79,369.51L377.36,371.42L376.73,370.53L374.20,371.71L374.20,373.48L377.03,374.38L378.92,375.57L380.98,373.36L382.25,372.62L383.36,370.70L385.72,369.38L386.67,370.12L388.09,368.94L391.40,368.21L390.77,366.43L393.93,365.11L394.24,364.07L398.34,363.63L400.07,360.83L402.44,361.12L404.01,360.83L404.17,361.71L405.74,360.97L407.95,362.00L409.05,360.67L409.05,358.46L412.51,358.01L414.24,360.37L417.08,360.07L418.5,360.36L421.33,359.17L423.84,356.94L424.16,359.30L427.15,359.59L429.19,358.84L431.23,356.91L431.70,355.43L429.95,352.78L428.69,352.19L429.16,350.27L430.42,351.00L429.46,348.20L429.92,346.13L428.64,340.67L427.54,339.19L424.72,341.13L423.32,343.79L421.74,342.62L422.52,340.54L422.82,336.55L424.85,334.63L425.47,333.15L424.68,331.67L425.62,330.93L425.30,329.75L426.23,328.27L425.45,327.53L424.50,325.02L421.52,324.89L421.67,321.49L421.34,318.24L417.74,315.74L414.62,316.19L415.55,314.85L415.23,312.93L413.20,311.90L412.26,310.72L412.88,309.39L411.79,308.07L412.41,306.73L409.75,306.00L409.13,303.05L407.41,302.01L407.10,304.08L405.69,302.90L405.54,303.79L402.73,302.16L404.91,299.21L403.97,298.32L404.28,295.66L402.73,293.59L400.23,293.15L402.10,289.75L402.41,286.21L404.28,285.17L404.74,283.84L403.34,283.25L404.9,278.81L406.29,276.01L406.14,274.97L407.84,273.79L404.73,269.95L405.51,267.88L405.51,266.25L404.11,266.40L401.32,264.33L399.77,261.23L397.60,260.2L397.76,258.72L399.15,259.01L400.54,257.54L402.87,257.09L404.41,254.14L407.20,254.28L406.89,252.51L407.35,250.59L409.52,249.99L411.68,250.73L412.45,249.84L414.77,250.28L415.85,248.65L416.01,249.98L417.40,250.12L418.48,247.46L420.64,245.97L427.44,247.43L430.54,248.74L433.63,247.25L434.40,247.69L438.72,246.48L438.87,245.00L441.18,243.80L443.35,244.23L443.99,248.51L447.25,250.12L450.35,250.83L451.26,248.61L454.35,248.43L454.84,250.50L457.63,251.95L459.18,251.64L460.44,253.84L463.06,252.93L462.93,255.00L461.07,255.61L461.09,256.79L462.32,256.34L464.03,257.21L462.82,259.88L464.22,260.75L466.69,259.4L466.84,258.65L468.09,259.97L468.74,262.62L470.60,262.75L471.57,266.29L474.21,266.85L475.01,268.17L476.24,267.71L479.47,265.45L481.68,268.08L483.68,266.73L485.70,267.14L487.83,264.30L491.88,265.57L492.33,264.39L494.02,263.77L494.93,262.42L495.73,263.74L499.96,266.63L500.57,265.88L499.30,264.28L500.34,261.60L500.31,259.53L500.46,259.09L503.24,258.74L506.62,257.21L507.41,257.64L508.54,260.28L511.02,260.53L513.55,263.29L517.45,264.55L519.82,266.57L520.63,268.33L523.64,271.38L527.43,274.55L531.25,279.05L530.07,281.74L530.41,283.36L534.09,288.01L535.83,289.15L536.25,294.17L534.73,296.12L535.09,298.04L536.71,300.96L536.61,303.62L534.83,307.65L536.27,309.39L532.59,312.43L530.05,310.86L527.86,310.75L527.22,309.88L526.00,311.24L526.33,312.26L525.44,314.50L526.17,319.51L522.30,321.80L519.88,326.43L518.78,326.30L518.50,327.79L520.55,328.34L522.97,332.13L524.40,332.85L526.17,335.03L524.00,336.55L525.14,338.74L526.03,335.92L526.81,335.75L528.40,337.05L528.90,338.22L532.58,341.69L533.69,342.26L535.15,344.30L537.40,346.32L539.41,345.09L541.97,346.81L544.45,345.57L544.22,349.27L543.93,350.31L543.33,351.36L544.31,352.81L546.86,354.38L545.93,354.99L548.72,359.95L549.24,362.01L552.08,361.94L555.56,362.59L558.27,363.71L564.06,362.23L565.73,365.73L564.96,366.49L561.37,367.92L561.11,369.84L562.09,371.15L561.90,376.03L561.16,377.97L561.07,380.78L558.63,384.10L556.97,387.24L558.01,390.91L556.79,392.86L554.43,393.51L550.43,391.84L547.03,395.17L545.81,397.56L544.18,402.33L541.19,403.58L541.64,409.19L540.73,410.98L540.78,413.34L539.98,413.36L541.33,416.88L542.91,416.40L542.80,418.47L543.58,417.71L545.19,418.71L545.74,421.95L547.45,420.14L550.05,422.59L551.48,422.41L553.60,424.43L554.69,423.51L557.43,424.77L557.89,424.32L561.59,425.85L562.52,424.79L563.51,425.95L565.42,425.90L565.91,426.63L565.02,429.02L565.14,433.6L563.98,438.21L561.66,440.78L560.79,444.35L559.69,445.12L559.74,447.04L559.12,447.94L559.35,450.6L561.95,452.45L566.91,458.68L567.94,461.02L570.66,460.95L577.19,460.03L578.28,458.81L581.18,459.32L581.4,461.39L582.57,463.28L583.87,463.98L583.17,467.40L584.05,470.18L583.45,471.38L583.68,474.04L581.46,474.84L584.04,480.98L585.03,481.83L581.77,485.63L577.27,485.75L575.97,485.34L570.71,480.90L570.33,478.55L565.63,477.05L561.02,478.64L558.68,481.66L554.57,484.42L552.75,481.95L550.21,483.34L547.09,487.11L547.43,488.29L546.91,493.32L544.53,495.00L543.63,497.98L545.19,502.68L545.66,509.17L545.40,512.14L540.96,515.34L539.86,516.99L537.63,518.37L532.14,518.49L530.32,516.16L530.92,514.07L529.28,512.63L528.32,513.39L526.37,512.24L524.43,512.43L524.62,513.76L522.84,513.35L523.67,514.51L521.58,515.00L520.64,516.64L518.86,516.67L515.69,519.54L509.42,521.57L508.13,521.30L506.65,519.85L504.70,519.43L502.80,521.54L502.34,523.17L500.12,525.72L495.77,527.11L493.05,529.08L491.81,532.79L490.69,533.99L489.29,537.71L485.13,541.31L484.18,543.24L484.04,545.32L481.78,545.64L478.04,544.80L477.38,543.92L473.96,542.93L472.17,541.62L470.71,541.48L468.75,540.17L471.31,537.63L471.62,536.15L472.75,535.55L474.81,532.27L476.25,530.92L475.73,527.68L476.36,526.63L476.34,524.86L476.97,523.52L476.47,521.75L473.71,520.90L473.38,520.31L473.65,515.87L472.66,513.82L473.28,511.44L469.72,510.74L468.60,511.05L466.98,510.03L466.63,508.12L467.25,505.74L466.6,504.42L467.39,503.08L465.11,501.04L463.66,501.05L459.65,502.57L455.61,501.27L453.18,499.37L452.71,500.56L450.14,502.06L449.99,502.80L446.30,504.60L444.22,506.39L443.08,505.06L440.66,504.64L439.05,505.09L436.65,507.47L436.98,508.95L436.02,510.13L431.64,504.39L426.98,508.11L423.43,507.09L416.18,506.07L414.24,504.30L412.95,504.16L409.41,504.76L409.25,508.01L405.87,510.97L402.48,511.86L400.06,510.97L398.45,510.82L397.49,507.57L394.58,506.98L394.26,511.12L391.84,512.15L389.90,511.26L386.20,510.51L383.94,509.47L383.29,510.36L381.52,509.46L378.46,509.60L376.84,510.48L376.84,512.26L374.73,514.02L373.45,513.72L370.86,514.60L364.24,514.56L359.57,513.35L353.44,513.31L348.62,511.65L346.36,511.33L344.90,512.21L345.35,516.20L344.06,516.64L341.65,514.84L334.59,511.67L332.17,511.20L329.63,507.47L327.88,505.38L326.28,504.77L325.97,503.74L324.67,504.16L324.37,502.98L320.99,502.35L320.22,499.82L317.03,497.71L314.30,496.94L314.00,495.31L311.92,494.84L308.56,493.01L306.47,493.13L303.13,491.01L302.86,487.16L302.10,484.79L297.44,485.01L293.28,483.76L293.30,482.58L291.72,480.92ZM408.98,307.33L408.98,307.33L408.98,307.33Z","c":[435.3,403.9]},{"id":"cataluna","name":"Cataluña/Catalunya","d":"M679.57,311.24L675.60,310.09L673.99,308.97L673.40,306.34L670.48,303.95L668.45,304.04L665.30,303.44L662.74,302.07L661.75,300.78L661.86,299.59L663.46,296.86L661.20,295.18L659.66,295.69L658.61,292.92L656.77,293.74L654.87,293.08L655.10,291.00L656.05,291.40L657.54,289.71L658.79,289.66L659.02,287.88L660.53,286.63L662.00,284.65L659.85,281.63L660.09,279.99L658.96,279.01L660.35,274.95L661.25,274.18L661.76,271.49L661.51,269.43L659.86,266.99L661.24,266.63L659.32,265.38L656.89,262.97L656.80,260.90L655.56,260.81L656.06,257.83L655.41,257.12L656.29,256.04L658.79,256.53L658.87,254.60L660.27,254.69L662.38,253.27L663.37,247.61L664.59,246.96L666.30,247.33L667.49,242.55L666.00,240.25L666.26,239.20L664.82,238.08L666.43,235.94L665.27,234.06L662.55,232.11L664.02,230.27L664.79,226.69L663.99,225.98L663.59,223.93L667.57,223.16L668.70,220.75L670.59,218.30L669.43,216.28L669.80,214.34L669.12,212.89L667.46,213.70L663.75,213.27L663.50,211.21L664.23,210.29L661.96,207.58L662.04,205.80L664.68,202.72L665.65,200.31L666.45,201.02L666.66,198.79L671.37,197.69L672.15,194.40L673.90,192.55L676.06,192.60L676.99,189.45L678.53,189.68L678.48,188.49L680.28,187.67L679.16,186.54L679.76,182.96L676.96,182.20L678.8,178.71L679.75,179.56L680.84,176.55L683.09,175.55L683.49,174.35L682.68,173.35L683.54,171.98L684.53,167.20L685.55,165.96L685.05,161.84L686.22,160.75L685.11,159.92L686.01,156.47L685.95,155.14L687.34,152.26L687.75,147.95L689.02,145.96L687.48,145.59L687.29,144.71L689.35,143.28L685.94,142.11L687.53,140.26L686.08,138.55L686.64,137.64L684.88,135.8L684.63,133.59L683.3,131.13L684.81,131.06L686.10,129.37L685.15,128.68L685.94,126.12L687.35,123.83L687.91,119.51L685.93,119.46L683.14,118.11L682.86,115.46L681.77,114.77L680.30,112.62L681.36,112.57L681.74,110.92L681.09,110.06L679.38,105.85L680.39,104.76L679.29,103.93L680.57,102.09L680.48,100.32L679.67,99.17L680.80,97.49L682.89,96.80L684.75,97.89L687.83,98.93L689.16,98.42L691.33,99.50L693.00,99.57L696.45,102.06L698.15,102.72L700.03,101.15L701.63,102.69L703.12,102.32L707.69,102.83L710.15,103.74L711.76,105.58L712.02,107.64L714.23,109.30L717.65,108.09L718.37,107.31L720.09,108.40L724.30,107.73L725.48,107.22L727.02,107.58L726.64,109.09L729.45,110.56L729.39,112.19L731.12,113.28L731.73,116.07L733.24,118.65L732.4,119.88L733.66,120.70L732.52,122.1L731.72,124.21L733.50,123.37L734.43,123.77L735.64,126.37L732.45,129.06L734.00,129.57L734.32,132.66L734.95,133.07L739.24,133.57L741.65,133.14L741.84,131.05L743.53,131.40L744.65,129.71L746.80,130.03L748.59,129.48L748.76,127.10L751.51,127.24L752.94,125.82L753.32,126.98L755.61,127.29L758.33,126.83L760.97,127.86L761.33,128.73L763.65,129.33L763.84,130.06L766.15,130.36L767.16,129.56L770.19,136.78L773.38,139.10L773.94,138.18L778.14,137.18L778.24,136.28L780.00,135.28L780.59,132.58L783.25,131.22L785.88,131.80L788.39,130.60L789.09,129.66L792.06,130.80L792.48,130.33L796.43,132.44L799.99,133.25L801.18,132.87L801.44,134.48L802.84,134.98L805.01,137.65L806.05,137.29L808.99,137.98L810.21,135.67L811.88,135.56L813.47,136.48L817.90,136.62L817.79,135.00L816.84,134.47L816.24,132.44L817.45,132.35L817.79,130.70L818.70,130.64L820.28,129.19L822.82,128.57L823.98,129.82L825.75,128.96L826.13,127.89L827.59,127.05L828.21,125.07L829.76,125.41L830.28,124.19L831.08,124.72L833.54,124.99L835.34,122.49L836.81,123.86L838.27,123.01L839.99,123.63L841.75,122.76L842.32,124.35L845.11,126.96L847.29,125.61L850.09,126.29L850.93,127.42L849.86,129.42L850.81,129.80L850.12,130.89L850.70,132.48L852.28,133.25L853.15,134.66L853.53,133.60L855.17,133.03L856.83,134.83L857.52,133.89L860.65,134.84L861.02,135.70L859.00,139.26L859.85,140.38L859.34,141.76L856.01,142.16L855.22,143.85L853.60,142.64L852.70,142.85L851.82,141.29L849.65,142.93L848.27,146.89L848.75,151.31L849.53,153.62L853.32,155.12L855.74,158.79L855.19,161.65L855.17,163.43L856.69,167.32L857.95,167.81L858.24,169.57L857.23,170.39L857.39,172.60L856.67,175.18L855.31,175.57L855.14,177.37L853.35,178.09L852.24,179.66L850.25,179.81L848.13,182.34L847.96,184.13L846.57,186.16L842.41,188.24L839.64,192.44L836.52,194.00L834.23,194.31L832.00,195.51L830.27,197.12L828.75,199.59L825.49,201.45L814.15,207.12L810.61,209.44L808.96,210.14L804.88,213.82L803.12,215.27L797.71,217.55L795.64,219.02L794.24,221.18L793.02,223.93L791.30,225.96L790.66,228.08L789.87,227.83L788.78,232.64L787.95,234.18L783.45,236.53L779.97,237.79L773.97,238.45L769.60,240.49L768.56,241.30L765.93,241.31L764.14,242.60L760.02,243.58L756.40,245.42L751.66,246.58L747.51,247.26L741.74,249.51L737.57,252.56L736.17,252.49L734.04,253.34L730.63,253.38L728.22,254.69L726.00,256.88L725.78,255.56L724.29,256.68L722.61,260.32L719.58,258.70L716.38,259.90L713.90,260.03L711.05,262.1L709.67,262.46L707.76,264.48L706.32,266.92L704.22,268.50L697.53,278.00L694.12,281.57L693.88,283.06L691.91,284.19L691.18,285.26L693.33,287.97L695.70,288.60L697.06,287.64L693.55,285.89L695.88,285.78L699.84,290.32L701.29,291.14L702.19,290.50L703.47,291.03L703.16,294.30L701.98,295.84L695.92,299.68L692.57,304.87L690.63,306.88L686.94,308.24L685.34,307.43L684.65,305.98L686.36,305.90L686.33,305.16L688.57,306.24L689.27,304.43L692.55,304.43L695.00,300.02L693.74,299.79L691.11,300.35L689.43,301.32L685.08,301.82L680.94,307.04ZM769.72,126.59L769.97,125.68L771.39,126.48L770.68,127.42L772.66,129.81L770.69,130.08L768.81,129.16Z","c":[743.1,191.3]},{"id":"valenciana","name":"Comunitat Valenciana","d":"M598.34,559.23L596.38,559.14L595.21,558.14L593.41,557.75L591.41,555.89L586.54,550.71L583.12,544.45L578.91,538.8L577.78,533.21L579.96,530.04L581.02,527.50L582.33,522.28L582.08,519.18L580.71,516.41L577.92,514.86L573.86,514.24L573.49,512.32L573.79,505.51L577.09,502.47L578.48,500.36L577.61,498.02L579.09,493.39L577.97,487.65L577.27,485.75L581.77,485.63L585.03,481.83L584.04,480.98L581.46,474.84L583.68,474.04L583.45,471.38L584.05,470.18L583.17,467.40L583.87,463.98L582.57,463.28L581.4,461.39L581.18,459.32L578.28,458.81L577.19,460.03L570.66,460.95L567.94,461.02L566.91,458.68L561.95,452.45L559.35,450.6L559.12,447.94L559.74,447.04L559.69,445.12L560.79,444.35L561.66,440.78L563.98,438.21L565.14,433.6L565.02,429.02L565.91,426.63L565.42,425.90L563.51,425.95L562.52,424.79L561.59,425.85L557.89,424.32L557.43,424.77L554.69,423.51L553.60,424.43L551.48,422.41L550.05,422.59L547.45,420.14L545.74,421.95L545.19,418.71L543.58,417.71L542.80,418.47L542.91,416.40L541.33,416.88L539.98,413.36L540.78,413.34L540.73,410.98L541.64,409.19L541.19,403.58L544.18,402.33L545.81,397.56L547.03,395.17L550.43,391.84L554.43,393.51L556.79,392.86L558.01,390.91L556.97,387.24L558.63,384.10L561.07,380.78L561.16,377.97L561.90,376.03L562.09,371.15L561.11,369.84L561.37,367.92L564.96,366.49L565.73,365.73L566.86,366.44L568.25,365.37L571.70,364.68L573.92,365.21L575.48,364.58L578.02,365.10L580.43,366.66L581.35,365.89L582.36,368.08L581.79,370.16L582.96,372.5L582.24,374.73L583.86,376.16L585.29,376.57L588.07,374.27L590.09,373.32L587.81,371.02L586.60,367.36L587.30,364.38L590.27,363.41L591.79,361.59L592.17,358.77L595.16,358.67L596.24,357.90L598.91,357.52L600.12,356.00L601.83,355.21L602.47,355.63L601.27,352.71L602.77,350.30L604.17,349.96L605.20,347.71L604.97,345.35L605.73,344.59L606.80,338.93L608.09,340.07L610.32,340.88L612.01,339.79L613.28,340.19L617.90,337.37L618.01,336.18L616.7,334.46L619.14,332.45L622.60,328.48L624.61,327.67L624.07,325.62L622.75,323.89L620.98,322.48L619.98,320.89L620.72,319.53L624.89,317.90L624.66,315.84L622.85,313.54L623.56,311.59L623.04,309.98L623.02,305.25L621.18,306.21L617.06,304.43L617.59,301.90L616.78,301.04L618.44,299.50L620.46,299.13L621.30,300.73L625.73,298.06L626.82,298.02L626.42,295.52L627.39,292.23L629.31,289.5L632.73,289.07L632.61,290.11L634.08,291.98L638.54,294.17L640.89,294.53L641.48,293.76L644.14,293.96L645.12,295.10L645.04,296.88L646.15,297.28L648.08,294.98L651.00,293.68L653.06,294.48L654.87,293.08L656.77,293.74L658.61,292.92L659.66,295.69L661.20,295.18L663.46,296.86L661.86,299.59L661.75,300.78L662.74,302.07L665.30,303.44L668.45,304.04L670.48,303.95L673.40,306.34L673.99,308.97L675.60,310.09L679.57,311.24L677.14,316.53L676.39,317.15L673.34,322.61L672.26,326.65L669.89,329.86L669.04,331.97L667.71,333.95L664.24,337.35L663.28,340.65L661.28,341.62L659.15,343.33L657.81,345.31L655.68,350.87L655.59,352.50L653.78,354.50L651.44,355.04L649.00,357.06L647.99,359.46L647.48,362.44L646.00,365.01L645.65,368.13L643.68,370.13L641.43,373.32L640.64,373.35L637.81,377.75L636.79,380.15L633.82,385.29L632.84,388.73L632.04,392.75L630.19,394.30L628.69,396.57L627.71,400.30L625.61,403.63L624.62,406.92L625.07,410.60L626.18,410.56L625.60,412.21L624.76,410.91L625.35,413.99L624.38,413.58L624.28,415.36L625.19,418.58L627.65,425.00L632.98,435.45L631.61,437.28L632.03,440.07L633.98,445.32L636.38,449.67L639.78,455.01L644.29,459.87L648.11,463.27L652.17,464.59L653.43,464.25L656.51,465.01L658.67,466.70L660.27,466.78L664.07,469.43L663.17,470.95L665.03,473.24L665.83,473.21L666.74,475.68L664.19,476.08L660.82,480.07L659.53,480.12L658.62,481.34L657.50,481.54L655.54,484.72L654.08,484.48L652.69,486.02L650.11,485.68L648.39,487.08L646.57,489.81L646.14,491.16L647.29,491.85L644.06,495.67L643.06,494.82L640.16,494.79L638.61,496.62L637.33,496.67L634.32,498.11L631.93,498.79L629.39,500.06L626.58,502.53L624.37,503.79L622.69,506.66L622.21,511.41L622.72,512.13L619.47,511.36L615.06,514.91L614.50,517.44L614.60,520.25L615.55,524.65L615.44,526.14L613.55,527.53L611.43,527.31L609.19,527.82L608.24,528.74L606.43,532.79L605.85,539.91L605.73,546.28L602.69,547.85L602.13,550.53L601.33,550.85L601.24,553.22L599.62,553.42L599.01,554.62ZM543.93,350.31L547.89,351.25L549.77,350.91L550.57,351.63L552.89,350.1L552.65,346.55L553.39,344.76L554.34,345.18L555.35,347.67L557.62,350.27L557.82,352.04L558.78,352.90L560.68,353.15L564.28,352.61L566.06,354.19L567.65,354.74L570.40,357.48L569.67,359.71L566.10,361.73L564.06,362.23L558.27,363.71L555.56,362.59L552.08,361.94L549.24,362.01L548.72,359.95L545.93,354.99L546.86,354.38L544.31,352.81L543.33,351.36Z","c":[609.3,418.2]},{"id":"extremadura","name":"Extremadura","d":"M153.84,524.40L153.55,523.36L152.09,523.59L150.91,524.88L150.29,523.97L148.15,525.07L146.8,526.49L144.71,526.12L142.54,527.51L141.77,526.74L138.77,520.84L138.85,518.92L137.94,517.41L136.52,516.46L134.90,512.7L130.31,506.73L128.99,503.57L127.11,502.16L128.70,498.97L127.09,498.90L127.56,495.37L128.43,494.08L128.49,492.60L131.39,488.73L131.97,486.53L132.97,485.54L131.10,484.28L131.67,478.39L132.24,476.34L136.50,474.15L137.05,472.69L139.51,471.46L140.54,469.73L142.20,468.32L144.12,468.55L146.34,465.09L147.48,464.69L148.99,462.97L147.66,460.26L149.64,458.71L150.01,457.54L152.55,454.09L155.27,449.91L154.21,448.39L154.90,447.08L153.42,443.92L150.17,441.28L148.43,440.91L144.69,442.54L141.86,441.53L142.33,437.71L143.02,436.41L140.85,434.98L138.16,434.28L135.38,432.1L135.08,427.94L136.44,425.78L133.68,423.30L133.86,422.86L130.96,419.78L131.07,417.27L130.34,415.76L132.05,412.87L131.47,411.67L132.68,409.35L130.85,407.65L129.28,407.14L128.84,406.23L126.63,405.84L126.05,404.78L126.15,402.27L123.63,402.01L122.26,400.47L120.96,397.75L118.63,396.46L118.12,393.77L116.92,392.24L116.58,389.27L122.10,389.96L125.99,391.61L127.75,391.24L130.71,392.26L133.95,390.77L136.51,390.14L143.42,391.76L145.19,390.94L150.25,391.44L153.13,390.52L153.88,387.74L155.24,385.43L154.81,384.23L156.19,381.33L155.53,377.90L156.85,376.62L157.64,376.65L159.27,375.38L159.46,374.35L161.59,372.51L162.01,369.72L161.60,368.08L163.09,366.21L163.23,362.52L164.23,361.23L163.75,357.07L163.03,355.27L161.33,354.61L161.24,352.69L159.91,350.42L155.70,349.51L154.37,347.24L154.80,344.30L153.89,343.53L155.29,339.89L157.70,338.50L158.79,338.84L159.64,337.10L162.77,337.51L165.47,336.73L165.81,336.15L167.62,338.14L170.10,338.83L171.54,338.29L173.25,338.65L175.99,336.68L177.79,339.11L179.12,337.23L185.10,336.85L187.36,335.01L186.80,332.92L187.16,331.60L188.95,329.89L194.03,327.84L195.76,327.75L197.25,325.43L200.22,325.53L201.07,323.49L203.34,321.19L206.01,320.98L208.88,319.30L209.86,318.00L212.67,318.23L214.18,320.20L215.73,320.69L216.14,322.62L218.19,322.24L217.50,324.14L221.67,326.33L220.21,328.21L220.32,329.69L219.52,330.11L222.46,331.53L225.12,331.75L224.76,333.37L225.82,334.88L230.46,337.22L231.56,337.25L232.85,336.11L233.53,333.91L236.72,332.22L236.85,333.11L239.10,331.10L240.51,331.13L241.36,334.70L239.91,336.00L240.51,337.05L242.54,337.69L244.45,336.41L247.58,336.78L250.05,338.76L250.47,340.69L252.19,340.88L253.07,343.86L254.17,343.74L258.67,345.91L262.78,344.82L263.13,343.35L265.04,342.51L265.86,340.75L268.05,340.95L271.84,339.84L270.67,343.37L269.87,344.24L270.27,347.64L269.93,348.97L272.03,353.44L269.80,354.73L269.25,358.56L270.11,362.72L269.74,365.52L267.56,371.38L266.69,375.06L269.24,374.08L272.40,373.85L274.58,375.52L275.34,377.16L273.56,379.04L272.86,382.58L273.26,385.98L277.20,386.65L277.86,385.48L280.60,382.73L283.29,382.63L283.85,386.19L282.73,387.06L285.20,390.35L284.22,391.96L283.50,396.82L280.25,400.75L280.56,401.50L284.45,405.41L285.99,407.95L288.79,410.96L290.54,410.99L293.94,416.07L298.01,419.98L299.13,419.85L300.85,421.36L303.54,422.29L308.19,419.70L310.90,419.44L311.87,418.13L314.75,416.39L316.36,414.94L317.92,417.47L314.80,424.52L315.10,426.15L311.27,426.84L313.26,432.78L314.52,433.83L314.79,436.94L317.95,439.19L319.04,441.13L317.14,440.66L314.45,439.00L312.38,438.38L310.14,438.79L307.61,437.87L306.13,440.80L304.51,442.11L304.15,444.76L303.00,447.26L303.93,448.90L306.31,450.26L305.80,451.88L304.68,451.87L303.86,453.18L302.11,452.86L298.63,450.74L296.56,450.55L298.51,458.12L299.60,459.92L300.41,459.34L302.47,460.70L304.39,460.88L305.32,462.37L304.46,466.94L303.18,466.33L299.82,466.27L297.69,469.20L296.85,471.55L296.31,475.09L295.47,477.73L294.15,479.63L290.12,480.60L286.24,482.45L284.97,481.69L281.27,481.92L280.32,481.31L281.37,485.17L280.24,485.30L280.21,486.78L278.46,486.00L278.27,487.33L276.33,488.33L275.17,489.78L272.41,491.06L271.10,492.51L271.23,493.99L266.57,493.45L265.25,495.35L265.69,497.13L264.08,497.09L263.72,499.16L258.81,502.30L258.29,504.36L255.87,504.16L252.26,506.89L251.07,509.81L251.04,511.14L252.77,512.96L251.56,516.48L252.98,517.55L253.87,521.12L254.97,522.47L255.18,527.65L253.87,528.21L253.97,531.17L252.31,532.91L251.18,532.74L250.49,534.5L246.94,533.82L242.45,538.59L239.71,538.23L239.15,534.66L241.11,533.97L242.60,532.53L241.82,531.33L243.16,529.74L240.28,528.18L238.30,529.61L236.38,529.12L233.26,530.52L232.31,530.05L229.51,531.75L229.13,533.81L226.84,534.64L225.62,537.86L227.03,539.67L226.17,541.28L225.03,541.54L225.16,542.87L223.61,546.23L220.7,545.86L219.70,546.57L217.93,545.93L213.35,547.27L211.57,547.22L207.08,550.79L205.99,549.27L203.23,549.04L201.97,547.82L198.26,547.11L196.54,545.13L194.63,544.04L193.93,540.47L192.31,540.41L190.56,539.47L187.79,539.67L188.42,540.43L186.08,542.43L186.68,543.78L184.74,543.71L184.61,542.82L180.91,541.96L179.10,542.63L177.98,542.00L178.55,539.66L175.62,535.41L172.85,535.76L168.02,534.85L166.69,535.68L165.10,534.89L165.15,533.70L162.23,533.60L161.78,532.84L163.15,530.67L163.59,527.58L161.47,527.95L159.07,527.26L155.92,525.07Z","c":[212.5,436.8]},{"id":"galicia","name":"Galicia","d":"M165.93,36.22L164.90,39.59L164.78,42.4L161.71,44.35L161.19,46.25L159.21,47.06L158.18,46.43L156.24,46.35L156.30,48.42L155.76,50.77L156.92,51.56L158.31,50.73L159.01,51.79L158.56,55.63L159.59,55.96L160.41,58.07L162.94,58.47L162.37,61.56L162.89,63.65L165.62,66.57L166.26,65.71L166.80,67.21L168.74,67.58L169.14,68.93L168.01,70.96L169.39,73.98L170.74,74.18L173.22,72.20L174.28,72.09L175.13,69.46L177.46,71.47L178.58,73.59L178.07,75.35L175.44,77.32L175.10,78.2L173.45,78.13L172.03,79.71L171.61,78.95L169.63,79.47L168.37,81.05L168.12,83.55L167.41,82.49L166.43,84.38L168.58,87.13L168.56,83.87L169.78,83.32L170.16,85.26L172.19,87.41L174.00,87.33L176.9,90.55L176.49,93.20L177.66,94.43L176.86,95.44L177.65,98.72L176.32,97.79L174.35,98.16L176.13,102.81L174.41,104.52L174.20,106.00L172.66,106.83L171.84,108.28L169.50,110.11L168.2,108.73L166.25,112.06L165.82,111.30L164.15,111.53L161.93,113.96L163.94,116.85L163.72,118.62L161.70,119.72L161.28,122.81L162.44,124.19L160.70,125.90L159.69,128.23L160.42,129.00L159.42,131.18L160.8,131.08L162.43,132.04L163.97,131.51L166.05,132.62L167.05,130.44L169.48,130.39L170.06,131.15L174.52,133.54L175.31,132.83L177.2,135.27L176.24,136.56L176.45,139.09L174.55,140.94L176.00,142.92L179.17,143.63L179.58,144.83L181.84,145.50L181.18,151.10L179.42,153.40L179.22,154.73L177.53,155.11L176.72,156.26L177.70,158.52L174.85,157.38L173.17,157.32L171,158.42L170.00,160.60L167.36,161.68L166.46,165.35L163.66,166.57L163.42,168.63L162.61,169.93L160.59,170.74L160.70,171.78L162.19,172.87L164.49,172.67L165.30,175.36L163.02,178.97L163.42,180.32L161.97,182.19L157.08,181.84L156.55,179.90L152.95,178.12L151.67,179.40L150.31,179.05L149.81,179.92L149.82,183.32L150.39,184.53L148.70,188.16L146.20,189.24L144.52,189.17L140.44,191.21L137.68,191.24L137.27,190.04L135.39,191L134.86,192.45L132.64,194.13L132.89,191.92L131.42,190.52L131.19,188.74L129.03,188.94L128.62,188.03L127.04,188.85L127.61,189.91L126.50,190.60L122.77,191.61L120.02,191.34L121.09,188.13L122.23,186.85L117.63,186.64L114.23,184.11L112.17,185.35L110.21,184.66L109.09,185.64L104.62,186.02L104.71,187.36L102.99,188.01L102.48,189.17L101.32,187.78L101.91,185.15L101.92,181.74L100.54,181.68L99.42,185.76L97.54,186.56L96.03,186.04L94.77,186.72L92.91,190.17L91.07,190.08L89.78,191.20L87.29,191.81L84.84,191.68L82.44,190.67L82.95,186.70L82.43,185.04L80.41,185.53L79.38,181.77L81.53,178.78L82.49,178.09L83.38,175.62L84.94,175.11L85.77,173.82L88.89,172.80L89.03,169.99L88.38,167.74L86.91,166.62L84.76,166.81L82.56,168.02L81.92,159.85L79.99,161.67L78.64,161.01L77.64,162.58L76.58,162.38L74.51,164.04L73.12,164.26L72.42,165.85L69.85,165.27L69.03,166.26L67.52,165.88L65.66,166.37L64.95,165.44L59.43,165.58L59.36,166.91L57.78,167.71L54.59,167.23L52.12,167.68L50.02,169.48L49.73,171.84L48.60,172.81L45.94,173.84L43.87,175.05L42.95,177.81L40.86,179.31L38.52,180.06L35.74,182.86L34.64,183.24L34.10,182.02L34.65,180.57L33.98,178.90L34.17,173.28L34.77,170.95L34.37,169.89L34.72,166.65L34.05,165.13L34.45,163.67L34.00,160.98L35.36,161.21L36.64,160.25L38.57,161.25L39.36,160.86L39.50,158.5L37.71,157.8L39.91,156.74L40.20,154.39L42.73,153.06L43.93,150.76L45.59,151.15L46.59,149.73L47.49,149.93L48.2,148.35L50.05,148.01L50.73,146.72L52.16,145.76L53.35,146.27L54.48,145.15L53.93,144.09L54.80,142.36L54.89,140.73L53.85,140.23L52.56,141.49L53.12,142.41L51.21,143.78L51.90,145.01L49.22,146.48L47.69,146.54L47.3,145.48L43.94,148.09L42.74,147.73L42.35,149.04L40.59,147.9L39.94,148.60L37.45,146.82L37.95,143.59L40.22,146.39L40.70,143.46L39.83,140.29L42.09,140.73L42.63,141.8L45.31,140.32L46.38,137.72L48.79,135.64L49.22,135.96L52.27,133.33L50.58,133.67L50.06,132.01L48.46,133.40L46.45,134.02L44.34,136.12L41.36,135.05L39.75,136.44L38.08,133.82L37.05,133.31L37.75,131.73L37.11,129.76L33.22,128.63L33.91,127.34L35.26,127.72L36.81,127.22L37.51,125.64L38.71,125.86L39.03,128.25L37.90,129.22L38.14,130.41L40.62,129.67L41.34,130.31L40.75,127.46L41.76,125.74L42.22,123.25L41.09,124.22L41.37,122.16L40.83,121.09L41.41,118.91L42.77,118.99L45.67,116.34L45.10,115.57L47.71,112.61L49.09,109.73L46.79,112.71L45.77,112.05L44.17,113.44L42.26,112.44L42.93,111.29L41.09,109.11L40.39,110.7L40.05,113.79L39.46,115.97L37.84,115.14L38.70,113.56L36.93,112.71L34.32,115.66L35.26,117.65L32.98,117.65L32.45,118.96L30.61,119.14L30.61,121.66L28.37,123.45L26.86,123.35L27.81,120.30L26.86,118.46L25.83,117.80L23.97,118.43L24.74,115.81L25.50,115.86L26.06,114.11L27.19,113.15L27.90,111.41L29.00,106.00L30.07,105.77L30.16,104.29L31.45,103.18L34.06,102.60L34.96,100.29L36.40,98.89L37.95,98.4L37.61,96.45L37.34,98.36L35.11,97.78L34.24,99.65L32.63,98.66L32.26,99.83L30.03,99.1L30.42,97.79L26.72,98.74L27.84,100.29L25.95,101.36L25.39,103.10L24.13,101.4L23.36,101.64L22.07,98.15L21.07,97.20L23.54,96.32L24.22,95.18L23.88,93.37L22.84,93.16L21.66,90.27L22.38,88.39L23.34,87.56L21.12,86.83L20.41,83.82L19.06,83.58L19.64,86.29L17.84,86.17L17.38,83.92L16.32,83.85L16.24,85.18L14.56,85.37L13.55,89.30L12.89,87.93L13.40,86.92L12,85.35L13.09,82.45L14.21,81.49L15.18,78.14L14.02,77.47L13.33,74.17L15.16,73.84L16.02,72.12L15.71,70.02L16.57,70.67L18.49,69.01L19.69,69.09L19.91,70.29L21.64,69.22L22.52,67.2L21.89,65.23L20.85,67.39L19.39,66.70L19.11,64.01L19.98,64.51L21.26,63.41L21.85,61.22L22.25,61.99L23.36,61.17L25.76,61.17L27.94,62.50L29.45,62.3L33.45,58.54L34.13,59.62L34.95,58.63L37.64,58.95L36.92,55.94L35.30,55.39L34.45,54.45L36.81,52.82L38.14,53.19L40.26,52.88L40.11,50.35L42.51,50.49L43.53,51.00L44.38,49.27L45.47,48.60L45.83,50.10L47.02,50.32L47.25,51.52L49.27,52.97L53.11,54.09L57.83,52.88L59.39,51.93L61.20,51.74L63.85,52.78L65.38,52.28L67.63,49.59L66.32,48.92L68.59,48.45L69.46,49.1L71.54,46.84L74.04,47.57L73.97,46.23L75.22,48.08L74,48.46L75.29,49.57L75.23,50.60L77.65,50.29L78.42,47.07L77.37,47.16L77.75,45.70L80.78,45.12L81.28,46.93L83.22,47.03L84.16,49.16L84.10,50.34L86.84,52.41L86.36,47.20L87.38,45.03L89.33,44.99L89.52,44.11L88.06,43.44L86.82,44.26L85.38,43.15L83.99,43.96L82.73,42.26L80.23,41.39L80.57,40.66L84.52,39.69L85.95,40.80L87.92,40.46L89.95,38.94L91.62,35.62L90.56,35.71L88.77,38.43L84.86,38.82L85.10,37.20L83.63,39.49L81.50,39.97L80.36,39.02L78.65,40.11L78.56,39.07L79.67,37.95L80.22,36.05L79.65,35.57L80.18,33.97L81.52,34.04L82.02,33.18L80.20,30.86L80.85,30.00L81.83,31.24L84.52,31.24L87.63,29.03L87.67,28.29L89.21,27.34L89.59,25.73L91.05,26.55L92.78,24.86L96.00,23.10L98.66,23.68L98.57,22.64L97.23,22.57L97.33,20.50L98.33,18.47L99.86,17.81L102.05,18.66L104.95,17.33L105.94,15.45L107.27,15.81L109.18,13.24L110.05,13.72L111.44,12.75L111.99,13.82L111.25,16.75L112.38,17.99L112.19,18.87L110.61,17.61L110.83,22.21L108.60,22.10L109.90,22.91L112.45,22.59L111.25,19.71L113.79,19.69L114.15,18.37L117.06,16.88L120.85,15.43L121.36,14.27L123.49,13.19L123.40,12L125.14,13.11L123.26,14.95L122.59,16.55L123.59,17.49L124.26,15.89L125.73,16.26L126.67,15.41L126.98,18.24L128.46,18.61L127.94,20.21L127.97,22.73L129.01,22.78L130.43,21.22L129.90,19.71L131.70,19.5L131.92,17.88L134.04,17.23L134.72,18.59L136.08,18.21L137.85,18.73L137.06,19.59L137.62,20.50L141.58,22.01L141.85,22.62L144.93,23.79L144.89,24.82L146.4,28.00L147.00,27.88L148.80,31.07L151.86,32.98L150.75,34.41L151.92,35.05L152.44,33.45L156.29,34.35L157.01,34.97L160.46,34.52L162.23,35.18L163.89,34.95ZM28.52,128.35L28.34,126.41L29.46,127.96ZM32.77,138.53L32.60,136.30L33.87,135.49ZM33.64,151.77L34.57,149.01L34.73,151.39ZM38.26,123.31L37.89,121.95L38.58,120.51L37.43,119.41L38.23,118.86L39.35,120.41Z","c":[104.2,105.9]},{"id":"madrid","name":"Comunidad de Madrid","d":"M397.76,258.72L397.60,260.2L399.77,261.23L401.32,264.33L404.11,266.40L405.51,266.25L405.51,267.88L404.73,269.95L407.84,273.79L406.14,274.97L406.29,276.01L404.9,278.81L403.34,283.25L404.74,283.84L404.28,285.17L402.41,286.21L402.10,289.75L400.23,293.15L402.73,293.59L404.28,295.66L403.97,298.32L404.91,299.21L402.73,302.16L405.54,303.79L405.69,302.90L407.10,304.08L407.41,302.01L409.13,303.05L409.75,306.00L412.41,306.73L411.79,308.07L412.88,309.39L412.26,310.72L413.20,311.90L415.23,312.93L415.55,314.85L414.62,316.19L417.74,315.74L421.34,318.24L421.67,321.49L421.52,324.89L424.50,325.02L425.45,327.53L426.23,328.27L425.30,329.75L425.62,330.93L424.68,331.67L425.47,333.15L424.85,334.63L422.82,336.55L422.52,340.54L421.74,342.62L423.32,343.79L424.72,341.13L427.54,339.19L428.64,340.67L429.92,346.13L429.46,348.20L430.42,351.00L429.16,350.27L428.69,352.19L429.95,352.78L431.70,355.43L431.23,356.91L429.19,358.84L427.15,359.59L424.16,359.30L423.84,356.94L421.33,359.17L418.5,360.36L417.08,360.07L414.24,360.37L412.51,358.01L409.05,358.46L409.05,360.67L407.95,362.00L405.74,360.97L404.17,361.71L404.01,360.83L402.44,361.12L400.07,360.83L398.34,363.63L394.24,364.07L393.93,365.11L390.77,366.43L391.40,368.21L388.09,368.94L386.67,370.12L385.72,369.38L383.36,370.70L382.25,372.62L380.98,373.36L378.92,375.57L377.03,374.38L374.20,373.48L374.20,371.71L376.73,370.53L377.36,371.42L378.79,369.51L380.36,370.40L380.36,369.51L382.42,368.19L383.99,368.78L383.21,367.16L384.63,366.27L386.53,363.47L387.94,363.77L389.05,362.00L389.84,362.44L390.78,360.67L391.89,360.38L392.83,357.87L392.99,355.36L389.54,353.87L388.75,352.25L387.65,353.13L385.14,351.79L383.25,353.27L381.52,352.52L379.49,349.27L377.12,350.44L375.87,349.84L374.93,348.07L371.48,347.76L370.38,346.57L368.96,347.89L368.81,345.82L366.14,346.10L363.80,343.58L363.97,342.40L361.93,342.24L360.05,340.75L358.31,343.10L355.02,342.34L355.50,341.01L353.93,340.11L353.01,338.33L351.43,338.76L351.42,340.54L348.44,340.07L346.69,343.45L344.94,345.06L343.86,343.58L343.07,344.31L341.67,342.97L340.75,340.30L340.78,336.75L339.22,336.14L338.88,338.51L335.25,341.28L335.23,342.61L334.28,343.63L332.55,343.76L329.39,345.20L328.12,346.66L325.46,345.89L325.15,345.00L326.10,344.87L326.59,343.4L325.83,341.17L328.69,338.10L327.48,333.80L328.90,333.37L330.44,336.05L333.89,335.79L333.44,333.87L335.02,332.85L334.90,329.45L336.80,327.55L342.59,327.75L341.99,325.09L343.25,323.92L343.48,316.38L343.18,314.76L345.7,313.45L346.35,309.76L345.73,309.61L345.75,307.69L347.00,307.55L347.60,309.77L350.88,309.65L354.64,308.05L353.71,307.46L354.19,305.39L353.90,302.88L355.78,301.56L356.42,299.5L358.15,297.14L359.09,296.71L359.10,295.23L360.99,292.58L364.41,293.78L365.66,293.05L367.21,293.50L367.22,292.17L368.48,289.96L368.33,288.93L369.58,286.28L369.91,283.91L369.29,283.47L371.32,280.23L372.27,277.87L374.3,276.10L379.11,274.94L381.14,273.76L382.85,271.25L383.95,268.89L385.66,267.12L388.14,266.09L390.00,264.03L391.25,261.52L393.57,259.60ZM408.98,307.33L408.98,307.33L408.98,307.33ZM343.89,305.75L343.91,304.12L346.10,302.81L348.11,304.60L347.95,305.49Z","c":[385.5,320.1]},{"id":"murcia","name":"Región de Murcia","d":"M536.52,604.03L533.86,601.72L528.55,597.98L523.14,597.34L523.5,598.96L520.68,597.09L518.49,593.44L512.62,584.96L512.44,583.78L510.78,581.89L508.25,577.34L508.51,573.05L509.31,572.30L508.42,568.02L509.17,563.87L509.29,561.80L510.72,559.41L509.23,558.25L507.46,559.31L505.18,558.46L501.60,558.67L499.95,556.62L498.00,556.80L496.39,557.71L494.74,555.82L491.63,554.23L488.83,551.32L487.33,548.82L487.15,547.35L484.04,545.32L484.18,543.24L485.13,541.31L489.29,537.71L490.69,533.99L491.81,532.79L493.05,529.08L495.77,527.11L500.12,525.72L502.34,523.17L502.80,521.54L504.70,519.43L506.65,519.85L508.13,521.30L509.42,521.57L515.69,519.54L518.86,516.67L520.64,516.64L521.58,515.00L523.67,514.51L522.84,513.35L524.62,513.76L524.43,512.43L526.37,512.24L528.32,513.39L529.28,512.63L530.92,514.07L530.32,516.16L532.14,518.49L537.63,518.37L539.86,516.99L540.96,515.34L545.40,512.14L545.66,509.17L545.19,502.68L543.63,497.98L544.53,495.00L546.91,493.32L547.43,488.29L547.09,487.11L550.21,483.34L552.75,481.95L554.57,484.42L558.68,481.66L561.02,478.64L565.63,477.05L570.33,478.55L570.71,480.90L575.97,485.34L577.27,485.75L577.97,487.65L579.09,493.39L577.61,498.02L578.48,500.36L577.09,502.47L573.79,505.51L573.49,512.32L573.86,514.24L577.92,514.86L580.71,516.41L582.08,519.18L582.33,522.28L581.02,527.50L579.96,530.04L577.78,533.21L578.91,538.8L583.12,544.45L586.54,550.71L591.41,555.89L593.41,557.75L595.21,558.14L596.38,559.14L598.34,559.23L599.15,564.53L597.44,561.77L596.00,562.71L595.75,565.23L593.88,567.80L592.29,569.03L591.70,571.27L595.27,576.19L597.09,577.17L601.54,578.51L601.82,577.17L600.50,576.47L600.94,574.98L600.02,571.61L600.25,568.64L598.85,565.28L599.83,565.40L599.89,567.47L601.05,568.17L600.18,571.60L601.28,575.27L603.50,578.60L601.15,581.63L597.58,582.33L594.70,584.20L592.56,583.67L587.74,586.33L583.97,585.99L585.26,585.21L583.60,584.37L583.55,582.45L582.57,582.48L581.00,584.59L576.41,583.98L574.98,585.35L574.00,585.38L572.73,586.89L574.24,588.48L569.99,588.00L569.62,586.53L567.30,585.11L564.52,584.89L563.26,586.69L558.35,586.22L555.46,588.22L553.54,589.89L552.92,591.53L550.00,592.49L548.72,593.55L547.16,596.7L547.54,598.91L546.57,599.52L544.42,598.68L541.21,601.27L539.25,601.46Z","c":[545.8,546.5]},{"id":"navarra","name":"Comunidad Foral de Navarra","d":"M473.42,137.20L473.24,135.13L475.21,134.51L474.72,132.15L475.32,131.70L474.81,127.12L472.99,126.55L471.06,129.98L470.43,128.21L468.46,128.23L467.82,125.58L469.04,126.01L471.12,122.73L473.53,121.22L475.35,121.64L476.43,122.96L475.83,123.86L478.25,123.82L479.15,122.63L482.02,121.85L481.68,119.78L480.63,120.39L480.28,116.99L479.66,115.52L480.71,114.47L482.97,113.85L483.40,112.81L482.46,109.86L483.20,108.96L483.33,107.34L485.42,105.38L484.90,100.66L485.15,97.40L486.92,94.71L488.28,94.98L488.91,96.16L490.55,95.39L492.37,95.66L494.16,94.75L494.58,92.67L498.48,91.72L499.06,90.08L498.11,87.28L498.71,87.13L500.00,83.26L502.24,82.48L502.53,81.59L504.32,80.96L507.27,77.51L506.04,76.05L505.85,73.54L507.15,70.55L508.95,70.52L508.62,68.75L509.37,68.74L510.00,70.35L510.58,69.16L514.29,67.16L514.24,64.35L514.97,63.45L518.55,62.64L520.77,60.97L522.57,60.78L525.43,61.46L525.17,63.39L526.12,65.89L528.84,66.57L530.13,63.88L529.51,63.00L531.45,62.37L533.40,62.47L536.44,64.33L538.70,64.72L539.59,64.11L541.58,65.84L542.08,68.05L541.56,71.32L540.54,72.82L540.59,74.89L539.90,77.42L536.22,80.91L536.09,81.81L538.27,85.01L544.18,86.50L544.87,84.11L544.49,80.72L546.25,78.75L549.54,78.08L548.37,79.44L547.10,82.73L551.22,84.99L552.39,83.78L555.76,85.77L556.20,85.31L558.19,86.59L558.38,88.06L560.15,86.54L562.16,88.41L567.46,89.30L567.94,90.47L571.77,92.58L573.70,91.64L577.20,92.72L580.67,92.61L582.29,91.38L584.69,91.01L586.11,92.89L586.33,95.25L584.66,94.86L582.71,95.22L580.35,97.06L580.58,99.57L578.54,102.15L577.94,102.17L578.35,105.86L577.76,106.32L578.71,107.77L577.56,109.88L575.15,110.24L575.35,111.72L573.68,111.77L572.10,114.77L570.76,115.55L566.84,115.95L566.10,116.71L566.60,118.18L566.21,120.71L564.11,121.36L562.58,120.95L558.50,121.06L558.28,124.47L556.77,124.66L558.31,125.36L555.33,127.36L555.39,130.02L553.90,130.80L551.13,129.54L549.42,133.72L550.67,135.17L550.85,136.35L549.69,138.60L548.04,139.38L546.27,141.79L546.31,143.27L545.16,145.96L546.69,146.51L547.34,147.98L545.85,149.49L542.76,154.00L543.40,155.17L542.71,158.15L541.69,160.39L541.89,162.16L543.45,164.05L543.12,169.08L545.3,170.80L546.44,173.88L549.19,173.96L549.72,176.61L547.32,178.89L545.57,182.19L544.58,185.76L543.23,186.68L542.05,188.63L539.90,188.53L538.50,187.68L536.51,187.72L535.01,189.08L532.71,188.84L530.08,187.71L528.81,185.52L526.02,184.25L524.80,184.13L523.91,185.48L521.91,185.07L520.05,184.07L518.32,181.59L516.65,182.22L515.41,181.50L513.73,181.68L512.79,180.52L512.34,181.12L510.16,178.79L509.09,178.66L508.58,176.01L509.76,173.47L513.20,169.57L513.33,168.38L514.37,167.18L517.30,168.60L518.19,167.40L519.88,167.52L521.28,168.97L523.99,167.28L522.58,165.24L523.92,163.88L522.24,163.62L522.06,162.15L519.76,161.75L517.00,160.77L515.63,160.94L512.06,157.61L511.93,158.50L510.54,157.64L511.12,156.15L510.79,154.82L509.27,154.85L507.53,151.48L506.48,151.94L506.00,150.77L504.33,150.94L503.69,149.18L500.93,147.75L498.81,148.67L497.16,150.17L495.94,149.90L496.52,148.11L496.04,146.49L494.04,145.05L494.78,143.56L492.34,143.15L490.08,144.37L489.30,143.34L487.79,143.81L485.95,142.80L485.62,141.33L483.34,141.06L481.79,139.01L481.65,139.90L479.82,139.04L478.32,140.54L476.32,138.64L474.80,138.81ZM559.29,139.83L558.91,142.36L556.96,143.59L557.06,141.52ZM562.38,136.05L564.55,137.47L565.82,139.36L565.24,140.41L560.65,139.35Z","c":[525.2,120]},{"id":"paisvasco","name":"País Vasco/Euskadi","d":"M405.96,78.61L404.90,74.32L404.90,71.95L403.85,69.14L407.15,68.25L408.34,66.03L411.19,65.28L410.89,63.81L412.24,63.95L414.19,63.21L414.34,64.24L416.14,63.65L419.89,64.82L420.94,63.48L423.33,63.18L423.78,61.55L423.62,58.44L426.31,58.58L427.51,57.54L430.66,59.30L431.56,59.00L432.47,60.92L433.06,59.88L432.45,57.96L431.25,56.63L433.34,55.58L435.42,53.65L436.92,53.05L437.35,50.82L441.69,50.65L442.59,51.08L446.48,51.20L450.20,48.80L451.27,51.46L453.99,53.36L456.23,53.04L457.27,52.44L459.09,54.64L461.79,55.06L462.83,54.61L464.05,56.22L466.44,55.90L467.95,57.07L469.78,59.71L471.43,59.69L472.34,60.72L473.84,60.84L476.71,62.44L481.67,63.26L485.25,61.73L488.73,63.75L490.52,63.13L491.87,63.56L493.06,62.65L499.92,60.32L501.13,60.89L501.26,60.00L502.89,58.93L506.04,59.03L508.41,57.36L508.98,56.01L510.46,54.95L514.18,53.7L513.90,54.74L515.13,56.34L514.40,57.39L516.52,58.24L517.89,59.40L517.61,60.59L518.55,62.64L514.97,63.45L514.24,64.35L514.29,67.16L510.58,69.16L510.00,70.35L509.37,68.74L508.62,68.75L508.95,70.52L507.15,70.55L505.85,73.54L506.04,76.05L507.27,77.51L504.32,80.96L502.53,81.59L502.24,82.48L500.00,83.26L498.71,87.13L498.11,87.28L499.06,90.08L498.48,91.72L494.58,92.67L494.16,94.75L492.37,95.66L490.55,95.39L488.91,96.16L488.28,94.98L486.92,94.71L485.15,97.40L484.90,100.66L485.42,105.38L483.33,107.34L483.20,108.96L482.46,109.86L483.40,112.81L482.97,113.85L480.71,114.47L479.66,115.52L480.28,116.99L480.63,120.39L481.68,119.78L482.02,121.85L479.15,122.63L478.25,123.82L475.83,123.86L476.43,122.96L475.35,121.64L473.53,121.22L471.12,122.73L469.04,126.01L467.82,125.58L468.46,128.23L470.43,128.21L471.06,129.98L472.99,126.55L474.81,127.12L475.32,131.70L474.72,132.15L475.21,134.51L473.24,135.13L473.42,137.20L471.44,136.48L469.47,137.39L466.89,137.13L467.31,134.46L465.37,136.85L465.98,137.73L464.31,137.74L463.09,136.87L462.8,137.76L461.13,138.07L461.72,137.03L460.80,136.01L457.94,137.81L457.46,136.04L455.94,135.46L455.93,134.13L454.11,134.89L455.00,132.51L455.72,127.77L453.89,127.20L452.36,125.58L450.09,125.16L448.91,129.16L446.64,130.07L446.04,131.40L444.97,129.04L446.32,128.00L446.31,125.93L444.8,126.53L444.78,124.61L443.71,123.73L441.13,122.27L441.27,120.05L440.65,118.72L438.83,118.14L438.83,117.40L437.01,117.27L435.50,117.87L434.89,116.39L433.67,116.10L432.91,114.48L431.40,114.63L430.93,112.27L429.88,112.72L427.45,111.99L426.25,112.74L424.13,113.04L424.88,112.30L425.33,110.08L423.36,108.60L426.51,103.41L426.95,101.78L425.59,100.75L423.94,103.42L422.43,103.87L421.22,102.7L420.02,105.07L418.21,105.66L415.03,102.12L415.48,99.75L417.29,98.86L418.94,95.45L421.95,95.89L424.37,96.77L423.92,98.10L425.59,99.57L426.94,98.97L428.00,100.00L432.83,99.09L433.27,97.91L435.22,96.27L434.31,95.09L432.95,94.95L430.99,93.18L431.43,92.29L428.86,89.94L427.96,90.68L424.34,90.11L422.08,88.78L422.53,88.04L424.33,88.18L424.47,84.48L423.41,84.04L424.91,81.82L421.74,79.76L423.09,77.68L423.09,76.65L424.43,75.61L422.63,74.43L421.43,75.32L419.92,74.29L419.02,75.03L416.91,72.52L415.26,72.97L413.01,75.05L411.06,75.50L410.61,76.68L409.11,76.98ZM443.19,114.12L443.81,115.44L445.63,116.32L445.94,117.35L448.67,118.22L449.75,121.17L453.09,121.58L454.44,120.39L457.47,120.80L458.70,122.71L462.18,122.38L464.47,123.69L466.73,122.78L466.24,119.38L465.18,119.10L464.59,120.73L462.47,120.75L461.39,118.84L460.48,118.41L462.87,115.72L463.74,112.16L461.79,113.36L460.71,111.60L458.75,112.06L455.71,110.76L454.66,110.92L452.07,109.46L447.99,109.5L445.73,110.40L445.12,109.37L443.93,111.89L443.95,113.82ZM415.40,66.61L413.60,67.20L414.20,68.53L414.06,71.94L414.81,72.68L416.16,71.93L415.85,69.42L417.05,68.23L417.20,67.05Z","c":[459.7,86.5]},{"id":"larioja","name":"La Rioja","d":"M443.71,123.73L444.78,124.61L444.8,126.53L446.31,125.93L446.32,128.00L444.97,129.04L446.04,131.40L446.64,130.07L448.91,129.16L450.09,125.16L452.36,125.58L453.89,127.20L455.72,127.77L455.00,132.51L454.11,134.89L455.93,134.13L455.94,135.46L457.46,136.04L457.94,137.81L460.80,136.01L461.72,137.03L461.13,138.07L462.8,137.76L463.09,136.87L464.31,137.74L465.98,137.73L465.37,136.85L467.31,134.46L466.89,137.13L469.47,137.39L471.44,136.48L473.42,137.20L474.80,138.81L476.32,138.64L478.32,140.54L479.82,139.04L481.65,139.90L481.79,139.01L483.34,141.06L485.62,141.33L485.95,142.80L487.79,143.81L489.30,143.34L490.08,144.37L492.34,143.15L494.78,143.56L494.04,145.05L496.04,146.49L496.52,148.11L495.94,149.90L497.16,150.17L498.81,148.67L500.93,147.75L503.69,149.18L504.33,150.94L506.00,150.77L506.48,151.94L507.53,151.48L509.27,154.85L510.79,154.82L511.12,156.15L510.54,157.64L511.93,158.50L512.06,157.61L515.63,160.94L517.00,160.77L519.76,161.75L522.06,162.15L522.24,163.62L523.92,163.88L522.58,165.24L523.99,167.28L521.28,168.97L519.88,167.52L518.19,167.40L517.30,168.60L514.37,167.18L513.33,168.38L513.20,169.57L509.76,173.47L508.58,176.01L509.09,178.66L510.16,178.79L512.34,181.12L512.79,180.52L513.13,182.43L511.62,183.35L512.25,184.37L510.90,185.73L508.92,186.35L508.33,187.55L503.91,188.96L500.64,185.76L500.05,186.95L498.35,185.79L495.74,185.69L494.66,184.97L494.00,182.02L495.22,181.41L494.58,179.64L491.94,177.32L491.46,175.55L493.73,174.33L493.70,172.71L490.64,172.01L486.22,172.37L484.1,173.74L483.15,171.68L483.12,169.76L480.67,168.61L475.94,168.82L472.59,169.30L471.24,171.39L469.41,172.29L467.42,171.58L466.84,174.39L467.47,175.72L464.89,177.81L464.01,180.78L463.11,182.42L459.88,181.41L457.59,181.58L456.68,182.33L454.52,180.73L451.78,181.34L450.99,179.13L454.31,174.22L454.30,172.45L452.45,170.69L451.39,171.44L449.70,170.86L448.64,172.20L448.23,177.82L444.27,179.63L442.45,181.41L440.30,180.10L440.29,178.77L438.88,174.04L437.05,174.50L432.16,174.38L430.00,170.10L428.63,169.96L428.31,167.74L426.63,165.98L425.70,163.91L427.38,162.87L427.37,161.09L428.43,159.76L427.66,158.28L428.27,157.24L427.18,153.55L427.79,152.37L426.87,151.34L426.86,150.15L429.75,149.84L430.05,149.10L428.52,147.04L427.15,146.90L427.76,145.27L427.45,144.09L428.97,144.23L428.67,145.86L429.90,148.07L430.66,148.06L429.88,145.26L430.03,143.34L431.08,141.56L429.24,138.61L427.87,137.28L428.93,136.54L429.37,134.02L428.15,132.99L426.94,133.88L425.12,132.71L427.09,131.67L429.65,128.40L430.10,127.07L429.48,125.44L428.42,124.86L428.57,123.67L431.44,123.66L432.96,124.39L433.87,123.35L435.54,124.08L436.14,123.63L438.57,124.21L439.33,125.39L440.54,124.93L442.06,125.37ZM435.09,126.00L435.09,126.00L435.09,126.00ZM438.88,126.28L438.29,127.91L439.34,127.31Z","c":[467.1,156.8]},{"id":"ceuta","name":"Ciudad Autónoma de Ceuta","d":"M260.76,737.94L261.94,737.52L264.23,739.79L265.73,740.26L267.76,738.68L268.24,739.87L265.22,740.40L263.52,741.85L261.37,740.92Z","c":[263.3,739.8]},{"id":"melilla","name":"Ciudad Autónoma de Melilla","d":"M441.47,793.68L443.00,796.04L443.35,797.82L441.67,798.72L440.14,796.50Z","c":[441.8,796.5]},{"id":"canarias","name":"Canarias","d":"M30.24,786.54L29.8,787.48L29.88,788.49L29.26,789L28.29,788.49L27.57,787.27L26.69,786.54L23.75,785.97L22.95,786.04L22.33,785.46L22.69,784.81L22.69,783.52L23.49,783.01L24.55,783.66L26.15,783.80L27.13,783.44L28.82,782.15L29.26,781.42L29.00,780.77L30.51,779.91L31.93,779.62L32.91,780.34L33.35,781.21L31.66,784.17L31.4,784.96L30.42,785.32ZM33.17,748.04L32.2,746.51L31.66,746.08L31.66,745.20L31.13,744.11L30.15,742.80L29.44,740.11L28.64,739.02L28.46,737.93L28.91,737.05L29.53,736.69L29.97,735.74L31.84,734.28L32.82,734.94L34.33,735.38L36.28,734.94L37.44,735.16L38.24,736.69L38.24,737.49L39.57,739.45L39.30,740.47L38.77,740.84L37.79,742.44L38.59,744.98L38.33,745.28L38.15,747.24L37.08,748.40L36.73,749.56L35.93,750.65L35.31,752.25L34.33,752.18L33.62,750.80L33.44,748.55ZM60.63,771.45L58.59,771.89L57.52,771.67L57.43,771.24L55.57,770.08L55.39,769.21L54.41,768.42L54.77,766.9L54.50,766.17L55.66,763.71L57.34,763.06L57.97,763.06L58.59,763.85L60.28,763.85L61.25,764.87L63.56,766.03L64.10,767.04L64.28,768.56L62.14,770.37L61.61,771.16ZM78.76,769.79L78.49,768.85L77.34,767.91L76.36,766.53L75.92,765.16L74.76,763.78L74.32,762.12L74.58,761.39L73.7,759.94L72.9,759.22L72.01,757.62L71.38,757.48L71.47,756.68L73.34,756.17L74.94,755.15L75.74,755.95L77.87,756.03L80.80,755.30L81.07,754.86L81.96,755.08L83.92,755.15L85.78,754.07L87.11,754.07L87.83,753.78L88.09,753.12L88.89,753.05L88.98,752.47L90.76,750.87L91.02,749.56L92.80,748.26L93.25,748.33L94.58,747.82L94.67,746.95L95.91,747.31L96.89,746.88L98.84,747.46L100.09,747.17L101.51,746.37L102.40,746.73L102.93,748.04L102.04,749.42L101.60,749.35L99.02,750.87L98.40,751.02L97.69,752.61L97.16,752.69L95.11,754.86L94.76,754.79L93.69,755.66L93.16,756.9L93.51,758.49L93.42,759.07L92.53,760.09L92.45,760.96L90.94,763.78L91.11,763.93L90.58,765.81L90.94,766.03L89.42,767.47L88.27,769.14L86.31,770.88L86.14,771.67L85.60,771.38L84.18,771.53L83.03,771.96L82.23,772.61L81.43,772.47L80.89,772.90L79.74,772.32L79.65,770.73L78.58,770.37ZM131.64,771.45L132.70,773.19L132.08,774.27L132.26,775.21L132.97,775.65L132.08,776.08L131.72,777.96L131.99,779.19L130.92,779.62L130.57,781.28L129.86,781.71L127.99,782.07L124.97,783.59L124.79,784.45L123.55,784.67L122.75,784.02L122.39,784.24L121.15,783.66L120.62,784.02L119.99,783.01L118.57,782.29L116.17,780.20L114.93,777.60L114.31,776.80L114.48,775.07L114.31,773.91L114.93,772.61L114.75,772.25L116,771.96L116.97,770.73L118.04,770.37L119.28,768.78L119.02,768.20L119.73,766.03L119.19,765.38L120.26,765.23L120.97,765.74L122.04,765.09L123.02,766.17L124.35,766.39L125.77,766.17L126.30,765.88L128.35,766.68L128.70,767.19L129.59,766.97L130.21,766.32L129.77,765.52L130.57,764.72L131.28,765.01L130.92,767.04L130.30,766.24L130.30,767.19L131.01,768.42L130.66,770.01L130.84,770.66ZM172.51,770.66L170.56,770.22L167.89,769.36L166.83,769.57L167.27,769.07L167.00,768.34L169.76,768.27L171.63,767.69L174.29,766.32L177.05,764.07L177.93,763.13L178.47,761.17L178.29,759.94L178.73,758.06L179.80,757.26L180.33,756.10L180.33,755.23L180.78,753.56L181.76,752.32L182.73,751.45L183.80,749.27L184.07,748.11L185.40,746.22L185.22,745.35L186.38,742.44L186.02,741.64L186.02,740.69L187.71,739.82L188.42,739.82L189.67,739.09L190.11,739.38L191.09,738.80L191.98,739.31L191.98,739.75L192.86,740.11L193.40,741.64L193.31,742.51L193.75,746.22L193.49,746.66L193.58,748.04L193.13,748.47L192.95,750.22L192.15,750.65L191.98,751.23L192.42,752.18L192.15,753.12L192.60,753.78L192.60,755.15L192.15,755.52L191.53,757.69L190.91,758.27L190.55,759.51L190.82,759.87L189.67,761.97L188.78,762.62L187.18,762.62L186.38,763.42L183.89,763.78L180.69,764.65L180.51,764.94L178.82,765.09L177.93,765.52L176.87,767.55L174.82,769.50L173.85,770.73ZM193.75,739.67L193.22,739.02L194.11,738.44ZM202.28,730.49L200.77,731.51L199.62,731.37L198.20,731.66L196.95,732.39L196.51,733.55L195.17,735.16L194.91,734.43L193.49,734.06L191.62,734.21L191.44,733.04L193.49,731.00L193.31,728.30L194.11,726.33L196.51,724.29L198.20,724.29L200.06,722.75L200.24,722.24L201.31,722.53L202.37,721.73L203.17,721.80L204.06,722.53L204.95,722.24L205.57,721.44L205.66,720.12L206.64,718.00L207.70,717.05L209.66,718.73L209.30,720.85L208.59,721.22L207.97,722.61L208.59,723.70L207.70,726.33L207.97,726.77L207.08,728.23L206.73,728.16L204.51,729.76L203.26,729.98ZM206.90,716.61L205.66,717.93L204.77,717.93L204.68,717.34L205.48,716.90L205.57,715.81L206.19,714.71L207.17,715.22L207.62,715.81ZM205.57,709.29L206.28,709L206.90,709.58L206.19,710.46L205.31,710.39Z","c":[116,749]}]}</script>
+<script src="datos/indice.js" onerror="window.__SIN_DATOS=true"></script>
+<script>
+"use strict";
+(function(){
+var D = window.DATOS;
+var app = document.getElementById("app");
+var MAPA=null,MAPA_OBS=null,MAPA_GEO=null,MAPA_DATOS=null;
+
+/* ---------- utilidades ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:"";}
+function rutaLocal(r){return r?encodeURI(r).replace(/#/g,"%23"):"";}
+var eur=new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+function dinero(n){return n==null||n===""?"—":eur.format(n);}
+function fechaHora(iso){if(!iso)return "—";var d=new Date(iso);if(isNaN(d))return esc(iso);
+  return d.toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"})+(iso.length>10?" "+d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}):"");}
+function fechaDia(iso){if(!iso)return "—";var p=iso.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:iso;}
+function diasHasta(iso){if(!iso)return null;var d=new Date(iso);if(isNaN(d))return null;return Math.ceil((d-new Date())/86400000);}
+function plazo(f){
+  var n=diasHasta(f.limite||f.fecha_limite);
+  if(n===null)return {txt:"Sin plazo indicado",cls:""};
+  if(n<0)return {txt:"Plazo cerrado",cls:"cerrada"};
+  if(n<=5)return {txt:(n===0?"Cierra hoy":n===1?"Cierra mañana":"Cierra en "+n+" días"),cls:"urgente"};
+  return {txt:"Quedan "+n+" días",cls:""};
+}
+function normaliza(s){return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();}
+function etNovedad(n){return n==="Nueva"?'<span class="et nueva">Nueva</span>':n==="Actualizada"?'<span class="et act">Actualizada</span>':n?'<span class="et ya">'+esc(n)+'</span>':"";}
+function etEncaje(e){return e==="ALTO"?'<span class="et alto">Encaje alto</span>':e==="MEDIO"?'<span class="et medio">Encaje medio</span>':"";}
+function lugar(f){var p=[f.ciudad,f.provincia,f.ccaa,f.pais&&f.pais!=="España"?f.pais:""].filter(function(x,i,a){return x&&a.indexOf(x)===i&&!(i>0&&a[i-1]&&x.indexOf(a[i-1])===0&&0);});
+  return p.length?p.join(", ")+(f.aprox?" (aprox.)":""):"Sin ubicación";}
+
+/* ---------- comunidades y mapa de teselas ---------- */
+var CCAA=[["Galicia",0,0],["Asturias",1,0],["Cantabria",2,0],["País Vasco",3,0],["Navarra",4,0],
+ ["Castilla y León",1,1,2],["La Rioja",3,1],["Aragón",4,1],["Cataluña",5,1],
+ ["Extremadura",0,2],["Madrid",2,2],["Castilla-La Mancha",3,2],["Comunidad Valenciana",4,2],["Baleares",6,2],
+ ["Andalucía",1,3],["Ceuta",2,3],["Melilla",3,3],["Murcia",4,3],["Canarias",0,4]];
+var NOMBRES=CCAA.map(function(c){return c[0];});
+function grupo(f){
+  if(f.ccaa&&NOMBRES.indexOf(f.ccaa)>=0)return f.ccaa;
+  if(f.pais&&f.pais!=="España")return "__extranjero";
+  return "__estatal";
+}
+var NOMGRUPO={"__extranjero":"Fuera de España","__estatal":"Estatal o sin ubicar"};
+function nombreGrupo(g){return NOMGRUPO[g]||g;}
+function abiertas(f){var n=diasHasta(f.limite);return n===null||n>=0;}
+
+/* ---------- estado y filtros (viven en la dirección, así se pueden compartir) ---------- */
+function parseHash(){
+  var h=location.hash.replace(/^#\/?/,""),q="",i=h.indexOf("?");
+  if(i>=0){q=h.slice(i+1);h=h.slice(0,i);}
+  var p={};q.split("&").forEach(function(kv){if(!kv)return;var a=kv.split("=");p[decodeURIComponent(a[0])]=decodeURIComponent((a[1]||"").replace(/\+/g," "));});
+  return {ruta:h.split("/").filter(Boolean),p:p};
+}
+function enlace(ruta,p){
+  var q=Object.keys(p||{}).filter(function(k){return p[k]!=="";}).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(p[k]);}).join("&");
+  return "#/"+ruta+(q?"?"+q:"");
+}
+
+/* ---------- vistas ---------- */
+function filaHTML(f){
+  var pl=plazo(f),pal=(f.palabras||[]).slice(0,5);
+  var imp=f.interes!=null&&f.lotes>1?'<span class="imp">Te interesa '+dinero(f.interes)+'</span><span>de '+dinero(f.presupuesto)+'</span>':'<span class="imp">'+dinero(f.presupuesto)+'</span>';
+  return '<a class="fila" href="#/l/'+esc(f.id)+'"><div class="tit">'+esc(f.titulo)+'</div>'
+   +'<div class="meta">'+etNovedad(f.novedad)+etEncaje(f.encaje)+imp
+   +'<span class="et '+pl.cls+'" style="'+(pl.cls?"":"background:none;padding:0;font-weight:400;color:inherit")+'">'+esc(pl.txt)+'</span>'
+   +'<span>'+esc(f.organo)+'</span><span>'+esc(lugar(f))+'</span></div>'
+   +(pal.length?'<div class="pal">'+pal.map(function(t){return "<span>"+esc(t)+"</span>";}).join("")+'</div>':'')+'</a>';
+}
+
+function avisos(){
+  var h="",mal=(D.fuentes||[]).filter(function(x){return !x.ok;});
+  if(mal.length)h+='<div class="aviso mal" role="alert"><strong>Hoy no se ha podido leer '+mal.map(function(x){return esc(x.nombre);}).join(", ")+'.</strong>Puede faltar alguna licitación reciente. '+mal.map(function(x){return esc(x.texto);}).join(" ")+'</div>';
+  var g=new Date(D.generado),h2=(new Date()-g)/3600000;
+  if(!isNaN(g)&&h2>48)h+='<div class="aviso ojo"><strong>Los datos tienen más de dos días.</strong>Última actualización: '+fechaHora(D.generado)+'. Pide que revisen la tarea programada.</div>';
+  return h;
+}
+
+function vistaInicio(){
+  var F=D.fichas,hoy=D.ultimoDia;
+  var nuevasHoy=F.filter(function(f){return f.primera===hoy;});
+  var recientes=F.filter(function(f){return f.novedad==="Nueva"||f.novedad==="Actualizada"||f.primera===hoy;});
+  var cierran=F.filter(function(f){var n=diasHasta(f.limite);return n!==null&&n>=0&&n<=7;}).sort(function(a,b){return new Date(a.limite)-new Date(b.limite);});
+  var porG={},nuevosG={};
+  F.forEach(function(f){if(!abiertas(f))return;var g=grupo(f);porG[g]=(porG[g]||0)+1;if(f.primera===hoy)nuevosG[g]=(nuevosG[g]||0)+1;});
+  var max=Math.max.apply(null,[1].concat(Object.keys(porG).map(function(k){return porG[k];})));
+  function nivel(n){if(!n)return 0;var r=n/max;return r>.75?4:r>.5?3:r>.25?2:1;}
+  MAPA_DATOS={porG:porG,nuevosG:nuevosG,max:max,nivel:nivel,href:function(nom,soloHoy){return enlace("lista",soloHoy?{ccaa:nom,abiertas:"1",dia:hoy}:{ccaa:nom,abiertas:"1"});}};
+  var otras=["__estatal","__extranjero"].filter(function(g){return porG[g];}).map(function(g){
+    return '<a class="chip" href="'+enlace("lista",{ccaa:g,abiertas:"1"})+'">'+nombreGrupo(g)+'<b>'+porG[g]+'</b></a>';}).join("");
+  var altas=nuevasHoy.filter(function(f){return f.encaje==="ALTO";}).length;
+
+  return avisos()
+   +'<h1>Oportunidades abiertas</h1><p class="sub">Búsqueda del '+fechaDia(hoy)+(D.hora?' a las '+esc(D.hora):'')+'. Actualizado '+fechaHora(D.generado)+'.</p>'
+   +'<div class="rejilla"><div>'
+   +'<section class="panel" aria-labelledby="t-mapa"><div class="panel-cab"><h2 id="t-mapa">Por comunidad autónoma</h2><p>Arrastra para moverte y rueda para ampliar. Pulsa el número para ver el listado.</p></div>'
+   +'<div class="mapa-stage" id="m-stage"><svg id="m-svg" class="reposo" role="group" aria-label="Mapa de licitaciones abiertas por comunidad autónoma"><g id="m-world"><rect class="inset" id="m-inset" rx="5"></rect><g id="m-reg" aria-hidden="true"></g></g><g id="m-lead" aria-hidden="true"></g><g id="m-bub"></g></svg>'
+   +'<button class="m-back" id="m-back" type="button" hidden>← Mapa completo</button>'
+   +'<div class="mapa-ctl"><button type="button" id="m-zin" aria-label="Acercar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" id="m-zout" aria-label="Alejar"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button type="button" id="m-zreset" aria-label="Ver todo el mapa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>'
+   +'<div class="m-tip" id="m-tip" hidden role="status"></div></div>'
+   +'<div class="leyenda" id="m-leyenda"></div>'
+   +(otras?'<div class="otras">'+otras+'</div>':'')+'</section>'
+   +'<section class="panel"><h2>Cierran en los próximos 7 días</h2>'
+   +(cierran.length?'<div class="lista">'+cierran.slice(0,6).map(filaHTML).join("")+'</div>'+(cierran.length>6?'<p><a href="'+enlace("lista",{orden:"plazo",abiertas:"1"})+'">Ver las '+cierran.length+' que cierran pronto</a></p>':''):'<p class="vacio">Ninguna licitación cierra esta semana.</p>')
+   +'</section></div><div>'
+   +'<section class="panel"><h2>Hoy</h2><div class="cifras">'
+   +'<div class="cifra"><b>'+nuevasHoy.length+'</b><span>nuevas</span></div>'
+   +'<div class="cifra"><b>'+altas+'</b><span>de encaje alto</span></div>'
+   +'<div class="cifra"><b>'+F.filter(function(f){return f.novedad==="Actualizada";}).length+'</b><span>actualizadas</span></div></div>'
+   +'<p class="sub" style="margin:8px 0 0">'+(D.descartadas||0)+' descartadas por poca relevancia · '+(D.conocidas||0)+' ya conocidas.</p></section>'
+   +'<section class="panel"><h2>Novedades</h2>'
+   +(recientes.length?'<div class="lista">'+recientes.slice(0,8).map(filaHTML).join("")+'</div>'+(recientes.length>8?'<p><a href="'+enlace("lista",{novedad:"1"})+'">Ver las '+recientes.length+' novedades</a></p>':'')
+     :'<p class="vacio"><b>Hoy no hay novedades.</b> Cuando el programa encuentre algo nuevo o que haya cambiado, saldrá aquí.</p>')
+   +'</section></div></div>';
+}
+
+function opciones(valores,sel,todas){
+  return '<option value="">'+todas+'</option>'+valores.map(function(v){return '<option value="'+esc(v[0])+'"'+(v[0]===sel?" selected":"")+'>'+esc(v[1])+'</option>';}).join("");
+}
+
+function filtrar(p){
+  var q=normaliza(p.q||"");
+  var r=D.fichas.filter(function(f){
+    if(p.ccaa&&grupo(f)!==p.ccaa)return false;
+    if(p.encaje&&f.encaje!==p.encaje)return false;
+    if(p.abiertas==="1"&&!abiertas(f))return false;
+    if(p.novedad==="1"&&!(f.novedad==="Nueva"||f.novedad==="Actualizada"))return false;
+    if(p.dia&&f.primera!==p.dia&&f.dia!==p.dia)return false;
+    if(p.fuente&&f.fuente!==p.fuente)return false;
+    if(q){var txt=normaliza([f.titulo,f.organo,f.expediente,f.ciudad,f.provincia,(f.palabras||[]).join(" ")].join(" "));
+      if(!q.split(/\s+/).every(function(t){return txt.indexOf(t)>=0;}))return false;}
+    return true;
+  });
+  var o=p.orden||"puntos";
+  r.sort(function(a,b){
+    if(o==="plazo"){var x=a.limite?new Date(a.limite):new Date(8e15),y=b.limite?new Date(b.limite):new Date(8e15);return x-y;}
+    if(o==="importe")return (b.interes!=null?b.interes:(b.presupuesto||0))-(a.interes!=null?a.interes:(a.presupuesto||0));
+    if(o==="reciente")return (b.primera||"").localeCompare(a.primera||"");
+    return b.puntos-a.puntos;
+  });
+  return r;
+}
+
+function vistaLista(p){
+  var fuentes=Array.from(new Set(D.fichas.map(function(f){return f.fuente;}))).sort();
+  var grupos=NOMBRES.concat(["__estatal","__extranjero"]).filter(function(g){return D.fichas.some(function(f){return grupo(f)===g;});});
+  var r=filtrar(p);
+  var h=avisos()+'<h1>'+(p.ccaa?esc(nombreGrupo(p.ccaa)):'Todas las licitaciones')+'</h1><p class="sub">Busca, filtra y ordena. La dirección de esta página guarda tus filtros: puedes copiarla para compartir lo que ves.</p>'
+   +'<form class="filtros" id="filtros" role="search">'
+   +'<label>Buscar<input type="search" name="q" value="'+esc(p.q||"")+'" placeholder="Título, órgano, palabra clave"></label>'
+   +'<label>Comunidad<select name="ccaa">'+opciones(grupos.map(function(g){return [g,nombreGrupo(g)];}),p.ccaa,"Todas")+'</select></label>'
+   +'<label>Encaje<select name="encaje">'+opciones([["ALTO","Alto"],["MEDIO","Medio"]],p.encaje,"Cualquiera")+'</select></label>'
+   +'<label>Fuente<select name="fuente">'+opciones(fuentes.map(function(x){return [x,x];}),p.fuente,"Todas")+'</select></label>'
+   +'<label>Plazo<select name="abiertas">'+opciones([["1","Solo abiertas"]],p.abiertas,"Todas")+'</select></label>'
+   +'<label>Ordenar por<select name="orden">'+opciones([["plazo","Fecha límite"],["importe","Importe"],["reciente","Más recientes"]],p.orden,"Mejor encaje")+'</select></label>'
+   +'<button class="boton" type="submit">Aplicar</button><a class="boton sec" href="#/lista">Quitar filtros</a>'
+   +'<button class="boton sec" type="button" id="csv">Descargar CSV</button></form>'
+   +'<p class="cuenta" aria-live="polite">'+r.length+' de '+D.fichas.length+' licitaciones</p>'
+   +'<section class="panel">'+(r.length?'<div class="lista">'+r.map(filaHTML).join("")+'</div>'
+     :'<p class="vacio"><b>No hay licitaciones con estos filtros.</b> Prueba a quitar alguno o <a href="#/lista">ver todas</a>.</p>')+'</section>';
+  app.innerHTML=h;
+  var fm=document.getElementById("filtros");
+  fm.addEventListener("submit",function(e){e.preventDefault();var np={};new FormData(fm).forEach(function(v,k){np[k]=v;});if(p.novedad)np.novedad=p.novedad;if(p.dia)np.dia=p.dia;location.hash=enlace("lista",np);});
+  document.getElementById("csv").addEventListener("click",function(){descargarCSV(r);});
+  return true;
+}
+
+function descargarCSV(r){
+  var cab=["Encaje","Puntos","Título","Órgano","Comunidad","Provincia","Ciudad","País","Presupuesto","Importe de interés","Fecha límite","Fuente","Palabras clave","Expediente"];
+  function c(v){v=String(v==null?"":v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+  var l=[cab.join(";")].concat(r.map(function(f){return [f.encaje,f.puntos,f.titulo,f.organo,f.ccaa,f.provincia,f.ciudad,f.pais,f.presupuesto,f.interes,f.limite,f.fuente,(f.palabras||[]).join(", "),f.expediente].map(c).join(";");}));
+  var b=new Blob(["﻿"+l.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="licitaciones.csv";document.body.appendChild(a);a.click();a.remove();
+}
+
+function vistaDias(){
+  var h=avisos()+'<h1>Por día de búsqueda</h1><p class="sub">Cada día guarda su Excel y su PDF con lo que se encontró esa jornada.</p><section class="panel">';
+  if(!D.dias.length)return h+'<p class="vacio"><b>Todavía no hay días.</b> Ejecuta el programa para generar el primero.</p></section>';
+  h+='<table class="tabla dias"><thead><tr><th>Día</th><th class="num">Nuevas</th><th class="num">Actualizadas</th><th>Archivos</th></tr></thead><tbody>'
+   +D.dias.map(function(d){return '<tr><td><a href="'+enlace("lista",{dia:d.dia})+'">'+fechaDia(d.dia)+'</a></td><td class="num">'+d.nuevas+'</td><td class="num">'+d.actualizadas+'</td><td>'
+     +(d.excel?'<a href="'+rutaLocal(d.excel)+'">Excel</a>':'')+(d.pdf?'<a href="'+rutaLocal(d.pdf)+'">PDF</a>':'')+(!d.excel&&!d.pdf?'<span class="sub">sin archivos</span>':'')+'</td></tr>';}).join("")
+   +'</tbody></table>'+(D.historico?'<p><a href="'+rutaLocal(D.historico)+'">Abrir el histórico completo (Excel, sin duplicados)</a></p>':'')+'</section>';
+  return h;
+}
+
+var CARGANDO={};
+function cargarFicha(id,ok,mal){
+  if(window.__FICHAS&&window.__FICHAS[id])return ok(window.__FICHAS[id]);
+  var s=document.createElement("script");s.src="datos/f/"+encodeURIComponent(id)+".js";
+  s.onload=function(){window.__FICHAS&&window.__FICHAS[id]?ok(window.__FICHAS[id]):mal();};
+  s.onerror=mal;document.head.appendChild(s);
+}
+
+function fichaHTML(i,f){
+  var pl=plazo(i),url=safeUrl(f.url);
+  var h='<a class="volver" href="javascript:history.back()">Volver</a><div class="ficha-cab">'+etNovedad(f.novedad)+etEncaje(f.encaje)+'<span class="et '+pl.cls+'">'+esc(pl.txt)+'</span></div>'
+   +'<h1>'+esc(f.titulo)+'</h1><p class="sub">'+esc(f.organo)+' · '+esc(lugar(f))+' · '+esc(f.fuente)+(f.expediente?' · Expte. '+esc(f.expediente):'')+'</p>';
+  if(f.cambios)h+='<div class="aviso ojo"><strong>Qué ha cambiado</strong>'+esc(f.cambios)+'</div>';
+  if(f.duplicada_en&&f.duplicada_en.length)h+='<p class="sub">También publicada en: '+f.duplicada_en.map(function(d){var u=safeUrl(d.url);return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(d.fuente)+'</a>':esc(d.fuente);}).join(", ")+'.</p>';
+  h+='<div class="datos">'
+   +'<div class="dato"><span>Presupuesto total</span><b>'+dinero(f.presupuesto)+'</b></div>'
+   +(f.importe_interes!=null&&f.n_lotes>1?'<div class="dato"><span>Lo que te interesa ('+f.n_lotes_interes+' de '+f.n_lotes+' lotes)</span><b>'+dinero(f.importe_interes)+'</b></div>':'')
+   +'<div class="dato"><span>Valor estimado</span><b>'+dinero(f.valor_estimado)+'</b></div>'
+   +'<div class="dato"><span>Fecha límite</span><b>'+fechaHora(f.fecha_limite)+'</b></div>'
+   +'<div class="dato"><span>Publicada</span><b>'+fechaHora(f.fecha_publicacion)+'</b></div>'
+   +'<div class="dato"><span>Tipo y procedimiento</span><b>'+esc([f.tipo,f.procedimiento].filter(Boolean).join(" · ")||"—")+'</b></div>'
+   +'<div class="dato"><span>Duración</span><b>'+esc(f.duracion||"—")+'</b></div>'
+   +'<div class="dato"><span>Puntos de encaje</span><b>'+esc(f.puntos)+'</b></div></div>'
+   +'<p>'+(url?'<a class="boton" href="'+esc(url)+'" target="_blank" rel="noopener">Abrir el anuncio original</a>':'')+'</p>';
+  if(f.descripcion)h+='<section class="panel"><h2>Qué se contrata</h2><p style="margin:0">'+esc(f.descripcion)+'</p></section>';
+  if(f.ia)h+='<section class="panel"><h2>Resumen</h2><p style="margin:0;white-space:pre-line">'+esc(f.ia)+'</p></section>';
+  h+='<section class="panel"><h2>Por qué encaja</h2>'
+   +((f.palabras||[]).length?'<table class="tabla"><thead><tr><th>Palabra clave</th><th>Familia</th><th>Dónde aparece</th></tr></thead><tbody>'+f.palabras.map(function(p){return '<tr><td>'+esc(p.termino)+'</td><td>'+esc(p.grupo)+'</td><td>'+esc(p.donde)+'</td></tr>';}).join("")+'</tbody></table>':'<p class="sub" style="margin:0">Sin palabras clave registradas.</p>')
+   +((f.motivos&&f.motivos.length)?'<p class="sub" style="margin:10px 0 0">'+f.motivos.map(esc).join(" · ")+'</p>':'')+'</section>';
+  if((f.lotes||[]).length>1)h+='<section class="panel"><h2>Lotes</h2><table class="tabla"><thead><tr><th>Lote</th><th>Objeto</th><th class="num">Importe</th><th>Interés</th></tr></thead><tbody>'
+   +f.lotes.map(function(l){return '<tr><td>'+esc(l.numero)+'</td><td>'+esc(l.nombre)+'</td><td class="num">'+dinero(l.presupuesto)+'</td><td>'+(l.interes?'<span class="et alto">Sí</span>':'<span class="et ya">No</span>')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if((f.documentos||[]).length)h+='<section class="panel"><h2>Pliegos</h2><table class="tabla"><tbody>'+f.documentos.map(function(d){
+    var loc=d.ruta_rel?'<a href="'+rutaLocal(d.ruta_rel)+'">'+esc(d.tipo)+' · '+esc(d.nombre)+'</a>':esc(d.tipo+" · "+d.nombre);
+    var u=safeUrl(d.url);return '<tr><td>'+loc+(d.error?'<div class="extracto">'+esc(d.error)+'</div>':'')+'</td><td>'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">Original</a>':'')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if((f.requisitos||[]).length)h+='<section class="panel"><h2>Qué piden y en qué página</h2><table class="tabla"><thead><tr><th>Requisito</th><th>Dónde está</th></tr></thead><tbody>'+f.requisitos.map(function(q){
+    var pags=(q.paginas||[]).map(function(n){return q.ruta_rel?'<a class="pag" href="'+rutaLocal(q.ruta_rel)+'#page='+encodeURIComponent(n)+'">p. '+esc(n)+'</a>':'<span class="pag">p. '+esc(n)+'</span>';}).join("");
+    return '<tr><td><b>'+esc(q.concepto)+'</b><div class="extracto">'+esc(q.documento||"")+'</div></td><td>'+pags+(q.mas?'<span class="sub"> +'+esc(q.mas)+' más</span>':'')+(q.extracto?'<div class="extracto">«'+esc(q.extracto)+'»'+(q.pagina_extracto?' (p. '+esc(q.pagina_extracto)+')':'')+'</div>':'')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if(f.notas&&f.notas.length)h+='<div class="aviso ojo"><strong>Avisos</strong>'+[].concat(f.notas).map(esc).join("<br>")+'</div>';
+  return h;
+}
+
+function vistaFicha(id){
+  var i=D.fichas.filter(function(x){return x.id===id;})[0];
+  if(!i){app.innerHTML='<p class="vacio"><b>No encontramos esta licitación.</b> Puede haberse retirado del registro. <a href="#/lista">Ver todas</a>.</p>';return;}
+  app.innerHTML='<p class="vacio" aria-live="polite">Cargando la ficha…</p>';
+  cargarFicha(id,function(f){if(location.hash.indexOf(id)<0)return;app.innerHTML=fichaHTML(i,f);window.scrollTo(0,0);},
+    function(){app.innerHTML='<a class="volver" href="#/lista">Volver</a><h1>'+esc(i.titulo)+'</h1><div class="aviso mal" role="alert"><strong>No se pudo cargar el detalle.</strong>Falta el archivo datos/f/'+esc(id)+'.js. Si la carpeta está en OneDrive, comprueba que esté sincronizada en este equipo («Mantener siempre en este dispositivo»).</div>'
+      +'<p>'+esc(i.organo)+' · '+esc(lugar(i))+' · '+dinero(i.presupuesto)+'</p>';});
+}
+
+/* ---------- estadísticas de Inicio: ofertas por grupo de palabras clave ----------
+   El grupo de cada palabra sale de «Por qué encaja» de cada ficha (termino, grupo), cargada con cargarFicha. */
+var EST={estado:"",hechas:0,fallos:0,sinPal:0,grupos:Object.create(null),sel:null};
+var EST_COL=["var(--g1)","var(--g2)","var(--g3)","var(--g4)","var(--g5)","var(--g6)","var(--g7)","var(--g8)"];
+function estColor(n){var k=Object.keys(EST.grupos).sort(function(a,b){return a.localeCompare(b,"es");});return EST_COL[Math.max(0,k.indexOf(n))%EST_COL.length];}
+function estAnade(id,f){
+  var tiene=false;
+  (f.palabras||[]).forEach(function(p){
+    var g=String(p.grupo||"").trim(),t=String(p.termino||"").trim();
+    if(!g||!t)return;tiene=true;
+    var G=EST.grupos[g]||(EST.grupos[g]={ofertas:Object.create(null),n:0,pal:Object.create(null)});
+    if(!G.ofertas[id]){G.ofertas[id]=1;G.n++;}
+    var P=G.pal[t]||(G.pal[t]={ofertas:Object.create(null),n:0});
+    if(!P.ofertas[id]){P.ofertas[id]=1;P.n++;}
+  });
+  if(!tiene)EST.sinPal++;
+}
+function estCargar(){
+  if(EST.estado)return;
+  EST.estado="cargando";
+  var ids=D.fichas.map(function(f){return f.id;}),i=0,vivos=0,fin=false;
+  function sig(){
+    if(i>=ids.length){if(vivos===0&&!fin){fin=true;EST.estado="listo";estPintar();}return;}
+    var id=ids[i++];vivos++;
+    cargarFicha(id,function(f){estAnade(id,f);hecho();},function(){EST.fallos++;hecho();});
+  }
+  function hecho(){vivos--;EST.hechas++;if(EST.hechas%10===0)estPintar();Promise.resolve().then(sig);}
+  for(var k=0;k<6;k++)sig();
+}
+function estFilas(items,max,color,enlaceDe,grupoDe){
+  return '<ul class="est-lista">'+items.map(function(it){
+    var barra='<span class="est-barra" aria-hidden="true"><span style="width:'+Math.max(2,Math.round(it.n/max*100))+'%;background:'+color(it.nombre)+'"></span></span>';
+    var nom='<span class="est-n"><i style="background:'+color(it.nombre)+'" aria-hidden="true"></i>'+esc(it.nombre)+'</span>';
+    var cuenta='<b>'+it.n+'</b>';
+    return '<li>'+(enlaceDe?'<a class="est-fila" href="'+esc(enlaceDe(it.nombre))+'" title="Ver estas ofertas en Todas">':'<button class="est-fila" type="button" data-est="grupo" data-g="'+esc(it.nombre)+'">')
+      +nom+barra+cuenta+(enlaceDe?'</a>':'</button>')+'</li>';
+  }).join("")+'</ul>';
+}
+function estOrden(obj){
+  return Object.keys(obj).map(function(k){return {nombre:k,n:obj[k].n};}).sort(function(a,b){return b.n-a.n||a.nombre.localeCompare(b.nombre,"es");});
+}
+function estPintar(foco){
+  var s=document.getElementById("est");if(!s||!D||!D.fichas)return;
+  var total=D.fichas.length,grupos=estOrden(EST.grupos),h="";
+  if(EST.sel&&!EST.grupos[EST.sel])EST.sel=null;
+  if(EST.sel){
+    var G=EST.grupos[EST.sel],pal=estOrden(G.pal);
+    h+='<button class="est-volver" type="button" data-est="volver">← Todos los grupos</button>'
+     +'<h2 id="est-t" tabindex="-1">'+esc(EST.sel)+'</h2><p class="sub">'+G.n+(G.n===1?' oferta':' ofertas')+' · '+pal.length+(pal.length===1?' palabra clave con coincidencias':' palabras clave con coincidencias')+'. Pulsa una palabra para ver sus ofertas en «Todas».</p>'
+     +estFilas(pal,pal[0].n,function(){return estColor(EST.sel);},function(t){return enlace("lista",{q:t});});
+  }else{
+    h+='<h2 id="est-t" tabindex="-1">Ofertas por grupo de palabras clave</h2><p class="sub">Pulsa un grupo para ver qué palabras clave han generado coincidencias.</p>'
+     +'<div class="est-kpis"><div class="est-kpi"><b>'+total+'</b><span>ofertas encontradas</span></div><div class="est-kpi"><b>'+grupos.length+'</b><span>grupos con coincidencias</span></div></div>'
+     +(grupos.length?estFilas(grupos,grupos[0].n,estColor,null):(EST.estado==="listo"?'<p class="vacio">Ninguna oferta tiene palabras clave registradas.</p>':''))
+     +'<p class="est-nota">Una oferta puede encajar en varios grupos, por eso la suma de los grupos puede superar el total.</p>';
+  }
+  if(EST.estado!=="listo")h+='<p class="est-nota" role="status">Leyendo fichas: '+EST.hechas+' de '+total+'. Las cifras se completan al terminar.</p>';
+  else if(EST.fallos)h+='<p class="est-nota">No se pudieron leer '+EST.fallos+(EST.fallos===1?' ficha':' fichas')+' (faltan sus archivos en datos/f); no cuentan en estas cifras.</p>';
+  s.innerHTML=h;
+  if(foco){var t=document.getElementById("est-t");if(t)t.focus();}
+}
+function estadisticas(){
+  var rej=app.querySelector(".rejilla");if(!rej||!D||!D.fichas)return;
+  var s=document.createElement("section");s.id="est";s.className="est";s.setAttribute("aria-labelledby","est-t");
+  s.addEventListener("click",function(e){
+    var b=e.target.closest("[data-est]");if(!b)return;
+    EST.sel=b.getAttribute("data-est")==="grupo"?b.getAttribute("data-g"):null;
+    estPintar(true);
+  });
+  rej.parentNode.insertBefore(s,rej);
+  estPintar();estCargar();
+}
+
+/* ---------- mapa de España por comunidades ----------
+   Burbujas con el total de abiertas y, en pequeño, las nuevas de hoy. El número lleva al listado de esa comunidad
+   (Todas, filtrado por comunidad y abiertas); el «+N», a las que entraron hoy. Clic en la comunidad: acerca el mapa. */
+var GEO_CCAA={galicia:"Galicia",asturias:"Asturias",cantabria:"Cantabria",paisvasco:"País Vasco",navarra:"Navarra",
+ cyl:"Castilla y León",larioja:"La Rioja",aragon:"Aragón",cataluna:"Cataluña",extremadura:"Extremadura",madrid:"Madrid",
+ clm:"Castilla-La Mancha",valenciana:"Comunidad Valenciana",baleares:"Baleares",andalucia:"Andalucía",ceuta:"Ceuta",
+ melilla:"Melilla",murcia:"Murcia",canarias:"Canarias"};
+/* burbujas que salen del territorio (px a escala 1) para no tapar islas ni ciudades autónomas */
+var MAPA_OFF={baleares:[26,46],canarias:[0,-62],ceuta:[0,34],melilla:[38,-8]};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&MAPA)MAPA.reset();});
+
+function montarMapa(){
+  var md=MAPA_DATOS,st=document.getElementById("m-stage");
+  if(!md||!st)return;
+  if(!MAPA_GEO){
+    try{MAPA_GEO=JSON.parse(document.getElementById("geo-mapa").textContent);}
+    catch(e){st.innerHTML='<p class="vacio">No se pudo cargar el mapa.</p>';return;}
+  }
+  var GEO=MAPA_GEO,NS="http://www.w3.org/2000/svg";
+  var svg=document.getElementById("m-svg"),gWorld=document.getElementById("m-world"),gReg=document.getElementById("m-reg"),
+      gLead=document.getElementById("m-lead"),gBub=document.getElementById("m-bub"),tip=document.getElementById("m-tip"),back=document.getElementById("m-back");
+  var W=GEO.W,H=GEO.H+34; /* margen inferior para las burbujas de Ceuta y Melilla */
+  function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in (a||{}))e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+
+  var DATA={},NAMES={};
+  GEO.regions.forEach(function(r){var nom=GEO_CCAA[r.id];if(!nom)return;DATA[r.id]=[md.porG[nom]||0,md.nuevosG[nom]||0];NAMES[r.id]=nom;});
+  var counts=Object.keys(DATA).map(function(k){return DATA[k][0];});
+  function rankOf(id){return 1+counts.filter(function(c){return c>DATA[id][0];}).length;}
+  function lic(n){return n===1?"licitación abierta":"licitaciones abiertas";}
+
+  /* leyenda con los rangos reales de cada tono (mismos cortes que usa la página para colorear) */
+  var mx=md.max,cortes=[0,Math.floor(mx*.25),Math.floor(mx*.5),Math.floor(mx*.75),mx],ley='Más oscuro, más licitaciones abiertas.';
+  for(var i=1;i<=4;i++){var lo=cortes[i-1]+1,hi=cortes[i];if(hi<lo)continue;
+    ley+='<span class="sw"><i style="background:var(--mapa'+i+')"></i>'+(lo===hi?lo:lo+'–'+hi)+'</span>';}
+  ley+='<span class="clave"><span class="kb">+N</span> nuevas hoy</span>';
+  document.getElementById("m-leyenda").innerHTML=ley;
+
+  /* territorios */
+  var regionEl={};
+  var ins=document.getElementById("m-inset");
+  ins.setAttribute("x",GEO.inset.x);ins.setAttribute("y",GEO.inset.y);ins.setAttribute("width",GEO.inset.w);ins.setAttribute("height",GEO.inset.h);
+  GEO.regions.forEach(function(r){
+    if(!DATA[r.id])return;
+    regionEl[r.id]=el("path",{d:r.d,"class":"region n"+md.nivel(DATA[r.id][0]),"data-id":r.id},gReg);
+  });
+
+  /* vista: pantalla = punto_mundo * s * k + (x, y) */
+  var stageW=0,stageH=0,s=1,f=1,view={k:1,x:0,y:0};
+  var hoverId=null,selId=null,tipId=null,tipMode=null,items=[],bubbleEl={};
+
+  function build(){
+    gBub.innerHTML="";gLead.innerHTML="";items.length=0;
+    GEO.regions.forEach(function(r){
+      var id=r.id;if(!DATA[id])return;
+      var n=DATA[id][0],t=DATA[id][1],rad=(n?15+1.5*Math.sqrt(n):11)*f;
+      var g=el("g",{"class":"burbuja","data-id":id},gBub),b=el("g",{"class":"b"},g);
+      if(n){
+        var aT=el("a",{"class":"lk lk-total",href:md.href(NAMES[id],false),"aria-label":NAMES[id]+": "+n+" "+lic(n)+". Ver listado"},b);
+        el("circle",{"class":"bc",r:rad.toFixed(1)},aT);
+        el("text",{"class":"bn","font-size":Math.max(9,8*f+.44*rad).toFixed(1)},aT).textContent=n;
+        if(t>0){
+          var aH=el("a",{"class":"lk lk-hoy",href:md.href(NAMES[id],true),"aria-label":NAMES[id]+": "+t+" nuevas hoy. Ver solo las de hoy"},b);
+          var pf=Math.max(9,10.5*f),txt="+"+t,pw=pf*.6*txt.length+10,ph=pf+5,cx=.74*rad,cy=-.8*rad;
+          el("rect",{"class":"pill",x:(cx-pw/2).toFixed(1),y:(cy-ph/2).toFixed(1),width:pw.toFixed(1),height:ph.toFixed(1),rx:(ph/2).toFixed(1)},aH);
+          el("text",{"class":"pt",x:cx.toFixed(1),y:cy.toFixed(1),"font-size":pf.toFixed(1)},aH).textContent=txt;
+        }
+      }else{
+        g.setAttribute("aria-label",NAMES[id]+": ninguna licitación abierta");
+        el("circle",{"class":"bc vacia",r:rad.toFixed(1)},b);
+        el("text",{"class":"bn vacia","font-size":Math.max(9,7*f+.4*rad).toFixed(1)},b).textContent="0";
+      }
+      var o=MAPA_OFF[id],off=o?[o[0]*f,o[1]*f]:[0,0],it={id:id,c:r.c,off:off,g:g,rad:rad,pos:[0,0]};
+      if(o){it.line=el("line",{"class":"guia"},gLead);it.dot=el("circle",{"class":"ancla",r:2.5},gLead);}
+      if(hoverId===id)g.setAttribute("class","burbuja sobre");
+      items.push(it);bubbleEl[id]=g;
+    });
+  }
+  function clampView(v){
+    v.k=Math.min(8,Math.max(1,v.k));
+    v.x=Math.min(0,Math.max(stageW*(1-v.k),v.x));
+    v.y=Math.min(0,Math.max(stageH*(1-v.k),v.y));
+    return v;
+  }
+  function render(){
+    var sc=s*view.k;
+    gWorld.setAttribute("transform","translate("+view.x+" "+view.y+") scale("+sc+")");
+    items.forEach(function(it){
+      var cx=it.c[0]*sc+view.x,cy=it.c[1]*sc+view.y,px=cx+it.off[0],py=cy+it.off[1];
+      it.pos=[px,py];
+      it.g.setAttribute("transform","translate("+px.toFixed(1)+" "+py.toFixed(1)+")");
+      if(it.line){
+        it.line.setAttribute("x1",cx.toFixed(1));it.line.setAttribute("y1",cy.toFixed(1));
+        it.line.setAttribute("x2",px.toFixed(1));it.line.setAttribute("y2",py.toFixed(1));
+        it.dot.setAttribute("cx",cx.toFixed(1));it.dot.setAttribute("cy",cy.toFixed(1));
+      }
+    });
+    if(view.k<=1.001)svg.classList.add("reposo");else svg.classList.remove("reposo");
+    if(tipMode==="anchor"&&tipId)placeAnchored(tipId);
+  }
+
+  /* ficha emergente */
+  function tipHTML(id){
+    var n=DATA[id][0],t=DATA[id][1];
+    return '<div class="mt-n">'+esc(NAMES[id])+'</div>'
+      +(n?'<div class="mt-v"><b>'+n+'</b> '+lic(n)+'</div>':'<div class="mt-v">Ninguna licitación abierta</div>')
+      +(t?'<div class="mt-h">+'+t+' nuevas hoy</div>':'<div class="mt-h nada">Sin novedades hoy</div>')
+      +'<div class="mt-r">Puesto '+rankOf(id)+' de '+counts.length+(n?'. Pulsa el número para ver el listado.':'.')+'</div>';
+  }
+  function showTip(id){if(tipId!==id)tip.innerHTML=tipHTML(id);tipId=id;tip.hidden=false;}
+  function hideTip(){tipId=null;tipMode=null;tip.hidden=true;}
+  function placeAtPointer(x,y){
+    var w=tip.offsetWidth,h=tip.offsetHeight,l=x+16,t=y-h-14;
+    if(l+w>stageW-4)l=x-16-w;if(l<4)l=4;if(t<4)t=y+18;if(t+h>stageH-4)t=stageH-h-4;
+    tip.style.transform="translate("+Math.round(l)+"px,"+Math.round(t)+"px)";
+  }
+  function placeAnchored(id){
+    var it=null;items.forEach(function(i){if(i.id===id)it=i;});if(!it)return;
+    var w=tip.offsetWidth,h=tip.offsetHeight,x=it.pos[0],y=it.pos[1],l=x-w/2,t=y-it.rad-h-12;
+    if(t<4)t=y+it.rad+12;
+    l=Math.min(stageW-w-4,Math.max(4,l));t=Math.min(stageH-h-4,Math.max(4,t));
+    tip.style.transform="translate("+Math.round(l)+"px,"+Math.round(t)+"px)";
+  }
+  function setHover(id){
+    if(hoverId===id)return;
+    if(hoverId){regionEl[hoverId].classList.remove("sobre");bubbleEl[hoverId].classList.remove("sobre");}
+    hoverId=id;
+    if(id){
+      regionEl[id].classList.add("sobre");bubbleEl[id].classList.add("sobre");
+      gReg.appendChild(regionEl[id]);
+      if(selId&&selId!==id)gReg.appendChild(regionEl[selId]);
+    }
+  }
+
+  /* animación de la vista */
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,raf=0;
+  function animateTo(target,dur){
+    cancelAnimationFrame(raf);clampView(target);
+    if(reduce||!dur){view=target;render();return;}
+    var from={k:view.k,x:view.x,y:view.y},t0=performance.now();
+    function step(now){
+      var u=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-u,3);
+      view={k:from.k+(target.k-from.k)*e,x:from.x+(target.x-from.x)*e,y:from.y+(target.y-from.y)*e};
+      render();if(u<1)raf=requestAnimationFrame(step);
+    }
+    raf=requestAnimationFrame(step);
+  }
+  function zoomAt(qx,qy,nk,v){
+    var base=v||view;nk=Math.min(8,Math.max(1,nk));var r=nk/base.k;
+    return {k:nk,x:qx-(qx-base.x)*r,y:qy-(qy-base.y)*r};
+  }
+  function setSel(id){
+    if(selId&&regionEl[selId])regionEl[selId].classList.remove("elegida");
+    selId=id;
+    if(id){regionEl[id].classList.add("elegida");gReg.appendChild(regionEl[id]);}
+    back.hidden=!id;
+  }
+  function select(id){
+    var bb=regionEl[id].getBBox(),k=Math.min(8,Math.max(1.6,Math.min(.7*W/bb.width,.7*H/bb.height)));
+    var cx=bb.x+bb.width/2,cy=bb.y+bb.height/2;
+    setSel(id);
+    animateTo({k:k,x:stageW/2-cx*s*k,y:stageH/2-cy*s*k},420);
+  }
+  function resetView(){setSel(null);animateTo({k:1,x:0,y:0},380);}
+  MAPA={reset:resetView};
+
+  /* punteros: arrastrar, pellizcar, hover y clic */
+  var ptrs={},nptr=0,drag=null,pinch=null,justDragged=false;
+  function local(e){var r=st.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+  function idAt(e){var n=e.target.closest&&e.target.closest("[data-id]");return n?n.getAttribute("data-id"):null;}
+  function two(){var k=Object.keys(ptrs);return [ptrs[k[0]],ptrs[k[1]]];}
+
+  /* un arrastre no debe abrir el enlace sobre el que termina */
+  svg.addEventListener("click",function(e){if(justDragged){e.preventDefault();e.stopPropagation();}},true);
+  svg.addEventListener("pointerdown",function(e){
+    var l=local(e);ptrs[e.pointerId]={x:l[0],y:l[1],sx:l[0],sy:l[1],type:e.pointerType,target:e.target};nptr++;
+    cancelAnimationFrame(raf);
+    if(nptr===2){var p=two();pinch={d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1,mx:(p[0].x+p[1].x)/2,my:(p[0].y+p[1].y)/2};drag={moved:true};}
+    else drag={moved:false};
+  });
+  svg.addEventListener("pointermove",function(e){
+    var p=ptrs[e.pointerId],l=local(e),x=l[0],y=l[1];
+    if(!p){
+      if(e.pointerType==="mouse"){
+        var id=idAt(e);setHover(id);
+        if(id){tipMode="pointer";showTip(id);placeAtPointer(x,y);}else hideTip();
+      }
+      return;
+    }
+    var dx=x-p.x,dy=y-p.y;p.x=x;p.y=y;
+    if(nptr===2&&pinch){
+      var q=two(),d=Math.hypot(q[0].x-q[1].x,q[0].y-q[1].y)||1,mx=(q[0].x+q[1].x)/2,my=(q[0].y+q[1].y)/2;
+      var v=zoomAt(mx,my,view.k*d/pinch.d);v.x+=mx-pinch.mx;v.y+=my-pinch.my;
+      view=clampView(v);pinch={d:d,mx:mx,my:my};hideTip();render();return;
+    }
+    if(!drag.moved&&Math.hypot(x-p.sx,y-p.sy)>5){
+      drag.moved=true;svg.classList.add("arrastre");
+      try{svg.setPointerCapture(e.pointerId);}catch(_){}
+      setHover(null);hideTip();
+    }
+    if(drag.moved&&nptr===1){
+      view=clampView({k:view.k,x:view.x+dx,y:view.y+dy});render();
+      if(selId&&view.k<1.05)setSel(null);
+    }
+  });
+  function endPtr(e){
+    var p=ptrs[e.pointerId];if(!p)return;
+    delete ptrs[e.pointerId];nptr--;
+    if(nptr<2)pinch=null;
+    if(nptr===0){
+      svg.classList.remove("arrastre");
+      if(drag&&drag.moved){justDragged=true;setTimeout(function(){justDragged=false;},60);}
+      if(drag&&!drag.moved&&e.type==="pointerup"){
+        var rg=p.target.closest&&p.target.closest(".region");
+        if(rg){
+          var id=rg.getAttribute("data-id");select(id);
+          if(p.type!=="mouse"){setHover(id);tipMode="anchor";showTip(id);}
+        }else if(p.type!=="mouse"&&!(p.target.closest&&p.target.closest(".burbuja"))){setHover(null);hideTip();}
+      }
+      drag=null;
+    }
+  }
+  svg.addEventListener("pointerup",endPtr);
+  svg.addEventListener("pointercancel",endPtr);
+  svg.addEventListener("pointerleave",function(e){if(e.pointerType==="mouse"&&!nptr){setHover(null);hideTip();}});
+  svg.addEventListener("wheel",function(e){
+    e.preventDefault();
+    var dy=e.deltaMode===1?e.deltaY*16:e.deltaY,l=local(e);
+    cancelAnimationFrame(raf);
+    view=clampView(zoomAt(l[0],l[1],view.k*Math.exp(-dy*.0016)));
+    if(selId&&view.k<1.05)setSel(null);
+    render();
+    if(tipMode==="pointer")placeAtPointer(l[0],l[1]);
+  },{passive:false});
+
+  /* teclado: los números son enlaces y se enfocan con Tab */
+  gBub.addEventListener("focusin",function(e){
+    var n=e.target.closest&&e.target.closest("[data-id]");if(!n)return;
+    var id=n.getAttribute("data-id");setHover(id);tipMode="anchor";showTip(id);placeAnchored(id);
+  });
+  gBub.addEventListener("focusout",function(){setHover(null);hideTip();});
+
+  /* botones */
+  document.getElementById("m-zin").addEventListener("click",function(){animateTo(zoomAt(stageW/2,stageH/2,view.k*1.6),220);});
+  document.getElementById("m-zout").addEventListener("click",function(){
+    var v=zoomAt(stageW/2,stageH/2,view.k/1.6);if(v.k<1.05)setSel(null);animateTo(v,220);
+  });
+  document.getElementById("m-zreset").addEventListener("click",resetView);
+  back.addEventListener("click",resetView);
+
+  /* tamaño */
+  function measure(){
+    var r=st.getBoundingClientRect();if(!r.width)return;
+    stageW=r.width;stageH=r.height;s=stageW/W;
+    var nf=Math.round(Math.min(1.1,Math.max(.62,stageW/900))*100)/100;
+    if(nf!==f||!items.length){f=nf;build();}
+    clampView(view);render();
+  }
+  if(window.ResizeObserver){MAPA_OBS=new ResizeObserver(measure);MAPA_OBS.observe(st);}
+  measure();
+}
+
+/* ---------- arranque ---------- */
+function marcaMenu(v){[].forEach.call(document.querySelectorAll("nav.menu a"),function(a){if(a.dataset.v===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});}
+/* El panel de configuración vive en config/configuracion.js y solo se carga al entrar (funciona aunque aún no haya datos). */
+function vistaConfig(sub){
+  marcaMenu("config");window.scrollTo(0,0);
+  if(window.PanelConfig){window.PanelConfig.mostrar(app,sub);return;}
+  app.innerHTML='<p class="vacio" aria-live="polite">Cargando la configuración…</p>';
+  var s=document.createElement("script");s.src="config/configuracion.js";
+  s.onload=function(){if(/^#\/config/.test(location.hash))window.PanelConfig.mostrar(app,sub);};
+  s.onerror=function(){app.innerHTML='<div class="aviso mal" role="alert"><strong>No se encuentra la carpeta config.</strong>Copia la carpeta «config» junto a index.html (debe contener configuracion.js y jszip.min.js).</div>';};
+  document.head.appendChild(s);
+}
+function pintar(){
+  var h=parseHash(),r=h.ruta;
+  MAPA=null;if(MAPA_OBS){MAPA_OBS.disconnect();MAPA_OBS=null;}
+  if(r[0]==="config"){document.title="Configuración · Licitaciones";vistaConfig(r[1]);return;}
+  if(!D){app.innerHTML='<div class="aviso mal" role="alert"><strong>Todavía no hay datos.</strong>No se encuentra datos/indice.js. Ejecuta el programa (licitaciones.py) para generarlos y abre esta página desde la misma carpeta.</div>';return;}
+  document.title="Licitaciones"+(document.getElementById("empresa").textContent?" · "+document.getElementById("empresa").textContent:"");
+  if(r[0]==="l"&&r[1]){marcaMenu("");vistaFicha(r[1]);return;}
+  if(r[0]==="lista"){marcaMenu("lista");vistaLista(h.p);window.scrollTo(0,0);return;}
+  if(r[0]==="dias"){marcaMenu("dias");app.innerHTML=vistaDias();window.scrollTo(0,0);return;}
+  marcaMenu("inicio");app.innerHTML=vistaInicio();window.scrollTo(0,0);montarMapa();estadisticas();
+}
+/* nombre de la empresa y logo de la cabecera. El panel de configuración la llama al guardar,
+   para que el cambio se vea al momento en este navegador (para el resto, en la próxima ejecución). */
+function pintarMarca(empresa,claro,oscuro){
+  document.getElementById("empresa").textContent=empresa||"";
+  var a=document.getElementById("logo");
+  [].forEach.call(a.querySelectorAll("img.lg"),function(i){i.remove();});
+  oscuro=oscuro||claro;
+  if(claro){
+    [["lg-claro",claro],["lg-oscuro",oscuro]].forEach(function(x){
+      var i=document.createElement("img");i.className="lg "+x[0];i.alt="";i.src="config/"+encodeURIComponent(x[1]);
+      i.onerror=function(){a.classList.remove("con-logo");};
+      a.insertBefore(i,a.firstChild);
+    });
+    a.classList.add("con-logo");
+  }else a.classList.remove("con-logo");
+  if(D)document.title="Licitaciones"+(empresa?" · "+empresa:"");
+}
+window.pintarMarca=pintarMarca;
+if(D)pintarMarca(D.empresa,(D.logo||{}).claro,(D.logo||{}).oscuro);
+var raizTema=document.documentElement;
+try{var t=localStorage.getItem("tema");if(t)raizTema.setAttribute("data-tema",t);}catch(e){}
+document.getElementById("tema").addEventListener("click",function(){
+  var osc=raizTema.getAttribute("data-tema")==="oscuro"||(!raizTema.getAttribute("data-tema")&&matchMedia("(prefers-color-scheme:dark)").matches);
+  var n=osc?"claro":"oscuro";raizTema.setAttribute("data-tema",n);try{localStorage.setItem("tema",n);}catch(e){}
+});
+window.addEventListener("hashchange",pintar);
+pintar();
+})();
+</script>
+</body>
+</html>

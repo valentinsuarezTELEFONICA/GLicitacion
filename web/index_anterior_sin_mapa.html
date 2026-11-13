@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licitaciones</title>
+<style>
+:root{
+  --papel:#f2f4f3; --tarjeta:#ffffff; --tinta:#16232b; --suave:#5b6b73; --linea:#d5dcda;
+  --marca:#0e6a86; --marca-fondo:#dcedf2; --alerta:#b8321f; --alerta-fondo:#f8e1dc;
+  --aviso:#8a5a00; --aviso-fondo:#f6e8c8; --bien:#2b7a4b; --bien-fondo:#dcefe3;
+  --mapa0:#e7ecea; --mapa1:#b9dbe6; --mapa2:#6fb3c9; --mapa3:#2a86a4; --mapa4:#0e5670;
+  --fuente:"Bahnschrift","Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+:root[data-tema="oscuro"]{
+  --papel:#101a20; --tarjeta:#17252d; --tinta:#e6eef0; --suave:#97a9b0; --linea:#2c3f49;
+  --marca:#59b6d2; --marca-fondo:#183846; --alerta:#ff8c78; --alerta-fondo:#43201b;
+  --aviso:#e8b955; --aviso-fondo:#3d3115; --bien:#79cf9a; --bien-fondo:#17382a;
+  --mapa0:#1e2e37; --mapa1:#1d4a5a; --mapa2:#25708a; --mapa3:#3498b8; --mapa4:#69c4de;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="claro"]){
+    --papel:#101a20; --tarjeta:#17252d; --tinta:#e6eef0; --suave:#97a9b0; --linea:#2c3f49;
+    --marca:#59b6d2; --marca-fondo:#183846; --alerta:#ff8c78; --alerta-fondo:#43201b;
+    --aviso:#e8b955; --aviso-fondo:#3d3115; --bien:#79cf9a; --bien-fondo:#17382a;
+    --mapa0:#1e2e37; --mapa1:#1d4a5a; --mapa2:#25708a; --mapa3:#3498b8; --mapa4:#69c4de;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.5 var(--fuente)}
+a{color:var(--marca)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--marca);outline-offset:2px;border-radius:4px}
+.contenedor{max-width:1180px;margin:0 auto;padding:0 16px}
+header.cab{background:var(--tarjeta);border-bottom:1px solid var(--linea);position:sticky;top:0;z-index:5}
+header.cab .contenedor{display:flex;align-items:center;gap:20px;min-height:56px;flex-wrap:wrap}
+.logo{font-weight:700;font-size:18px;letter-spacing:.01em;text-decoration:none;color:var(--tinta)}
+.logo small{display:block;font-weight:400;font-size:12px;color:var(--suave);letter-spacing:0}
+nav.menu{display:flex;gap:4px;flex:1}
+nav.menu a{padding:8px 12px;border-radius:6px;text-decoration:none;color:var(--suave);font-weight:600}
+nav.menu a[aria-current="page"]{background:var(--marca-fondo);color:var(--marca)}
+nav.menu a:hover{color:var(--tinta)}
+.tema{background:none;border:1px solid var(--linea);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--suave)}
+main{padding:20px 0 60px}
+h1{font-size:26px;line-height:1.2;margin:0 0 4px}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 6px}
+.sub{color:var(--suave);margin:0 0 18px}
+.aviso{border-radius:8px;padding:10px 14px;margin:0 0 14px;border:1px solid}
+.aviso.mal{background:var(--alerta-fondo);border-color:var(--alerta);color:var(--tinta)}
+.aviso.ojo{background:var(--aviso-fondo);border-color:var(--aviso)}
+.aviso strong{display:block}
+.rejilla{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:860px){.rejilla{grid-template-columns:1fr}}
+.panel{background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:16px}
+.panel+.panel{margin-top:16px}
+
+/* mapa de teselas: la pieza central de la página */
+.mapa{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.tesela{border:0;border-radius:6px;min-height:74px;padding:7px 6px;text-align:left;cursor:pointer;
+  background:var(--mapa0);color:var(--tinta);display:flex;flex-direction:column;justify-content:space-between;
+  text-decoration:none;position:relative;overflow:hidden}
+.tesela .n{font-size:24px;font-weight:700;line-height:1}
+.tesela .c{font-size:11.5px;hyphens:auto;line-height:1.15;overflow-wrap:anywhere}
+.tesela[data-t="1"]{background:var(--mapa1)}
+.tesela[data-t="2"]{background:var(--mapa2)}
+.tesela[data-t="3"]{background:var(--mapa3);color:#fff}
+.tesela[data-t="4"]{background:var(--mapa4);color:#fff}
+:root[data-tema="oscuro"] .tesela[data-t="4"],:root[data-tema="oscuro"] .tesela[data-t="3"]{color:#0b1419}
+@media (prefers-color-scheme:dark){:root:not([data-tema="claro"]) .tesela[data-t="3"],:root:not([data-tema="claro"]) .tesela[data-t="4"]{color:#0b1419}}
+.tesela:hover{outline:2px solid var(--tinta);outline-offset:-2px}
+.tesela .nuevo{position:absolute;top:6px;right:6px;font-size:11px;font-weight:700;background:var(--tarjeta);color:var(--marca);border-radius:10px;padding:0 6px}
+.tesela.vacia{cursor:default}
+.leyenda{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--suave);margin-top:10px;flex-wrap:wrap}
+.leyenda i{width:18px;height:10px;border-radius:2px;display:inline-block}
+.otras{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--linea);background:var(--tarjeta);border-radius:16px;padding:4px 12px;cursor:pointer;text-decoration:none;color:var(--tinta);font-size:13px}
+.chip:hover{border-color:var(--marca)}
+.chip b{margin-left:4px}
+
+/* etiquetas */
+.et{display:inline-block;border-radius:4px;padding:1px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.et.alto{background:var(--bien-fondo);color:var(--bien)}
+.et.medio{background:var(--aviso-fondo);color:var(--aviso)}
+.et.nueva{background:var(--marca-fondo);color:var(--marca)}
+.et.act{background:var(--aviso-fondo);color:var(--aviso)}
+.et.ya{background:var(--mapa0);color:var(--suave)}
+.et.cerrada{background:var(--alerta-fondo);color:var(--alerta)}
+.et.urgente{background:var(--alerta-fondo);color:var(--alerta)}
+
+/* tarjetas de licitación */
+.lista{list-style:none;margin:0;padding:0}
+.fila{display:block;text-decoration:none;color:inherit;padding:12px 4px;border-bottom:1px solid var(--linea)}
+.fila:last-child{border-bottom:0}
+.fila:hover .tit{text-decoration:underline}
+.fila .tit{font-weight:600;line-height:1.3}
+.fila .meta{color:var(--suave);font-size:13px;margin-top:3px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center}
+.fila .meta .imp{color:var(--tinta);font-weight:600}
+.pal{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.pal span{background:var(--marca-fondo);color:var(--marca);border-radius:4px;padding:0 6px;font-size:12px}
+.vacio{color:var(--suave);padding:20px 4px}
+.vacio b{color:var(--tinta)}
+
+/* resumen de hoy */
+.cifras{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.cifra{background:var(--papel);border-radius:8px;padding:10px 12px}
+.cifra b{display:block;font-size:26px;line-height:1.1}
+.cifra span{font-size:12px;color:var(--suave)}
+
+/* listado */
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:end}
+.filtros label{display:flex;flex-direction:column;font-size:12px;color:var(--suave);gap:2px}
+.filtros input,.filtros select{border:1px solid var(--linea);background:var(--tarjeta);border-radius:6px;padding:7px 9px;min-width:140px}
+.filtros input[type=search]{min-width:220px}
+.boton{border:1px solid var(--marca);background:var(--marca);color:#fff;border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block}
+:root[data-tema="oscuro"] .boton{color:#0b1419}
+.boton.sec{background:none;color:var(--marca)}
+.cuenta{color:var(--suave);margin:0 0 6px}
+
+/* ficha */
+.ficha-cab{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.datos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:14px 0}
+.dato{background:var(--papel);border-radius:8px;padding:9px 12px}
+.dato span{display:block;font-size:12px;color:var(--suave)}
+.dato b{font-size:16px}
+.tabla{width:100%;border-collapse:collapse;font-size:14px}
+.tabla th,.tabla td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+.tabla th{font-size:12px;color:var(--suave);font-weight:600}
+.tabla td.num,.tabla th.num{text-align:right;white-space:nowrap}
+.pag{display:inline-block;margin:0 4px 4px 0;padding:0 8px;border:1px solid var(--marca);border-radius:4px;text-decoration:none;font-size:13px}
+.extracto{color:var(--suave);font-size:13px;margin-top:3px}
+.volver{display:inline-block;margin-bottom:12px;text-decoration:none;font-weight:600}
+.tabla.dias td a{margin-right:10px}
+.pie{color:var(--suave);font-size:12px;margin-top:24px}
+@media(max-width:560px){.cifras{grid-template-columns:1fr 1fr 1fr}.tesela{min-height:64px}.tesela .n{font-size:20px}}
+@media(max-width:560px){.mapa{grid-template-columns:repeat(2,minmax(0,1fr))}.mapa .tesela{grid-column:auto!important;grid-row:auto!important;min-height:58px}.tesela .c{font-size:13px}}
+/* configuración */
+.pestanas{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--linea);margin:0 0 14px}
+.pestanas a{padding:8px 12px;text-decoration:none;color:var(--suave);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px}
+.pestanas a[aria-current="page"]{color:var(--marca);border-bottom-color:var(--marca)}
+.pestanas a span{font-weight:400;font-size:12px;margin-left:4px}
+.acciones{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.acciones .crece{flex:1}
+.acciones input[type=search],.acciones select{border:1px solid var(--linea);background:var(--tarjeta);border-radius:6px;padding:7px 9px;min-width:160px}
+.tabla-mov{overflow-x:auto}
+.tabla td.acc{white-space:nowrap;text-align:right}
+.mini{border:1px solid var(--linea);background:var(--tarjeta);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px;color:var(--tinta)}
+.mini:hover{border-color:var(--marca);color:var(--marca)}
+.mini.peligro:hover{border-color:var(--alerta);color:var(--alerta)}
+.boton.peligro{background:var(--alerta);border-color:var(--alerta)}
+.tabla tr.inactiva td{color:var(--suave)}
+.tabla tr.inactiva td.txt{text-decoration:line-through}
+.tabla input[type=checkbox]{width:18px;height:18px;cursor:pointer}
+dialog.dlg{border:1px solid var(--linea);border-radius:10px;background:var(--tarjeta);color:var(--tinta);padding:20px;width:min(540px,calc(100vw - 32px))}
+dialog.dlg::backdrop{background:rgba(0,0,0,.45)}
+dialog.dlg h2{margin-bottom:14px}
+.campo{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--suave);margin:0 0 12px;border:0;padding:0;min-width:0}
+.campo legend{padding:0;margin-bottom:3px}
+.campo input,.campo select,.campo textarea{border:1px solid var(--linea);background:var(--tarjeta);border-radius:6px;padding:7px 9px;font-size:15px;color:var(--tinta);width:100%}
+.campo small{color:var(--suave)}
+.op{display:flex;gap:8px;align-items:flex-start;margin:6px 0;color:var(--tinta);font-size:14px;line-height:1.35}
+.op input{margin-top:2px;flex:none}
+.op select{border:1px solid var(--linea);background:var(--tarjeta);border-radius:6px;padding:3px 6px;margin-left:4px;max-width:100%}
+.dlg-error{color:var(--alerta);min-height:1.2em;margin:4px 0;font-weight:600}
+.dlg-botones{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+.ajustes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px}
+.paso{margin:4px 0 0;padding-left:20px}
+.paso li{margin:2px 0}
+code{background:var(--papel);border-radius:4px;padding:0 4px;font-size:13px}
+@media print{header.cab,.filtros,.volver{display:none}}
+</style>
+</head>
+<body>
+<header class="cab"><div class="contenedor">
+  <a class="logo" href="#/" id="logo">Licitaciones<small id="empresa"></small></a>
+  <nav class="menu" aria-label="Principal">
+    <a href="#/" data-v="inicio">Inicio</a>
+    <a href="#/lista" data-v="lista">Todas</a>
+    <a href="#/dias" data-v="dias">Por día</a>
+    <a href="#/config" data-v="config">Configuración</a>
+  </nav>
+  <button class="tema" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+</div></header>
+<main><div class="contenedor" id="app"></div></main>
+<dialog class="dlg" id="dlg" aria-labelledby="dlg-titulo"></dialog>
+
+<script src="datos/indice.js" onerror="window.__SIN_DATOS=true"></script>
+<script>
+"use strict";
+(function(){
+var D = window.DATOS;
+var app = document.getElementById("app");
+
+/* ---------- utilidades ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:"";}
+function rutaLocal(r){return r?encodeURI(r).replace(/#/g,"%23"):"";}
+var eur=new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+function dinero(n){return n==null||n===""?"—":eur.format(n);}
+function fechaHora(iso){if(!iso)return "—";var d=new Date(iso);if(isNaN(d))return esc(iso);
+  return d.toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"})+(iso.length>10?" "+d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}):"");}
+function fechaDia(iso){if(!iso)return "—";var p=iso.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:iso;}
+function diasHasta(iso){if(!iso)return null;var d=new Date(iso);if(isNaN(d))return null;return Math.ceil((d-new Date())/86400000);}
+function plazo(f){
+  var n=diasHasta(f.limite||f.fecha_limite);
+  if(n===null)return {txt:"Sin plazo indicado",cls:""};
+  if(n<0)return {txt:"Plazo cerrado",cls:"cerrada"};
+  if(n<=5)return {txt:(n===0?"Cierra hoy":n===1?"Cierra mañana":"Cierra en "+n+" días"),cls:"urgente"};
+  return {txt:"Quedan "+n+" días",cls:""};
+}
+function normaliza(s){return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();}
+function etNovedad(n){return n==="Nueva"?'<span class="et nueva">Nueva</span>':n==="Actualizada"?'<span class="et act">Actualizada</span>':n?'<span class="et ya">'+esc(n)+'</span>':"";}
+function etEncaje(e){return e==="ALTO"?'<span class="et alto">Encaje alto</span>':e==="MEDIO"?'<span class="et medio">Encaje medio</span>':"";}
+function lugar(f){var p=[f.ciudad,f.provincia,f.ccaa,f.pais&&f.pais!=="España"?f.pais:""].filter(function(x,i,a){return x&&a.indexOf(x)===i&&!(i>0&&a[i-1]&&x.indexOf(a[i-1])===0&&0);});
+  return p.length?p.join(", ")+(f.aprox?" (aprox.)":""):"Sin ubicación";}
+
+/* ---------- comunidades y mapa de teselas ---------- */
+var CCAA=[["Galicia",0,0],["Asturias",1,0],["Cantabria",2,0],["País Vasco",3,0],["Navarra",4,0],
+ ["Castilla y León",1,1,2],["La Rioja",3,1],["Aragón",4,1],["Cataluña",5,1],
+ ["Extremadura",0,2],["Madrid",2,2],["Castilla-La Mancha",3,2],["Comunidad Valenciana",4,2],["Baleares",6,2],
+ ["Andalucía",1,3],["Ceuta",2,3],["Melilla",3,3],["Murcia",4,3],["Canarias",0,4]];
+var NOMBRES=CCAA.map(function(c){return c[0];});
+function grupo(f){
+  if(f.ccaa&&NOMBRES.indexOf(f.ccaa)>=0)return f.ccaa;
+  if(f.pais&&f.pais!=="España")return "__extranjero";
+  return "__estatal";
+}
+var NOMGRUPO={"__extranjero":"Fuera de España","__estatal":"Estatal o sin ubicar"};
+function nombreGrupo(g){return NOMGRUPO[g]||g;}
+function abiertas(f){var n=diasHasta(f.limite);return n===null||n>=0;}
+
+/* ---------- estado y filtros (viven en la dirección, así se pueden compartir) ---------- */
+function parseHash(){
+  var h=location.hash.replace(/^#\/?/,""),q="",i=h.indexOf("?");
+  if(i>=0){q=h.slice(i+1);h=h.slice(0,i);}
+  var p={};q.split("&").forEach(function(kv){if(!kv)return;var a=kv.split("=");p[decodeURIComponent(a[0])]=decodeURIComponent((a[1]||"").replace(/\+/g," "));});
+  return {ruta:h.split("/").filter(Boolean),p:p};
+}
+function enlace(ruta,p){
+  var q=Object.keys(p||{}).filter(function(k){return p[k]!=="";}).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(p[k]);}).join("&");
+  return "#/"+ruta+(q?"?"+q:"");
+}
+
+/* ---------- vistas ---------- */
+function filaHTML(f){
+  var pl=plazo(f),pal=(f.palabras||[]).slice(0,5);
+  var imp=f.interes!=null&&f.lotes>1?'<span class="imp">Te interesa '+dinero(f.interes)+'</span><span>de '+dinero(f.presupuesto)+'</span>':'<span class="imp">'+dinero(f.presupuesto)+'</span>';
+  return '<a class="fila" href="#/l/'+esc(f.id)+'"><div class="tit">'+esc(f.titulo)+'</div>'
+   +'<div class="meta">'+etNovedad(f.novedad)+etEncaje(f.encaje)+imp
+   +'<span class="et '+pl.cls+'" style="'+(pl.cls?"":"background:none;padding:0;font-weight:400;color:inherit")+'">'+esc(pl.txt)+'</span>'
+   +'<span>'+esc(f.organo)+'</span><span>'+esc(lugar(f))+'</span></div>'
+   +(pal.length?'<div class="pal">'+pal.map(function(t){return "<span>"+esc(t)+"</span>";}).join("")+'</div>':'')+'</a>';
+}
+
+function avisos(){
+  var h="",mal=(D.fuentes||[]).filter(function(x){return !x.ok;});
+  if(mal.length)h+='<div class="aviso mal" role="alert"><strong>Hoy no se ha podido leer '+mal.map(function(x){return esc(x.nombre);}).join(", ")+'.</strong>Puede faltar alguna licitación reciente. '+mal.map(function(x){return esc(x.texto);}).join(" ")+'</div>';
+  var g=new Date(D.generado),h2=(new Date()-g)/3600000;
+  if(!isNaN(g)&&h2>48)h+='<div class="aviso ojo"><strong>Los datos tienen más de dos días.</strong>Última actualización: '+fechaHora(D.generado)+'. Pide que revisen la tarea programada.</div>';
+  return h;
+}
+
+function vistaInicio(){
+  var F=D.fichas,hoy=D.ultimoDia;
+  var nuevasHoy=F.filter(function(f){return f.primera===hoy;});
+  var recientes=F.filter(function(f){return f.novedad==="Nueva"||f.novedad==="Actualizada"||f.primera===hoy;});
+  var cierran=F.filter(function(f){var n=diasHasta(f.limite);return n!==null&&n>=0&&n<=7;}).sort(function(a,b){return new Date(a.limite)-new Date(b.limite);});
+  var porG={},nuevosG={};
+  F.forEach(function(f){if(!abiertas(f))return;var g=grupo(f);porG[g]=(porG[g]||0)+1;if(f.primera===hoy)nuevosG[g]=(nuevosG[g]||0)+1;});
+  var max=Math.max.apply(null,[1].concat(Object.keys(porG).map(function(k){return porG[k];})));
+  function nivel(n){if(!n)return 0;var r=n/max;return r>.75?4:r>.5?3:r>.25?2:1;}
+  var mapa=CCAA.map(function(c){
+    var n=porG[c[0]]||0,nv=nuevosG[c[0]]||0,st="grid-column:"+(c[1]+1)+(c[3]?" / span "+c[3]:"")+";grid-row:"+(c[2]+1);
+    var inner='<span class="n">'+n+'</span><span class="c">'+esc(c[0])+'</span>'+(nv?'<span class="nuevo">+'+nv+' hoy</span>':'');
+    return n?'<a class="tesela" data-t="'+nivel(n)+'" style="'+st+'" href="'+enlace("lista",{ccaa:c[0],abiertas:"1"})+'" aria-label="'+esc(c[0])+': '+n+' abiertas'+(nv?', '+nv+' nuevas hoy':'')+'">'+inner+'</a>'
+      :'<span class="tesela vacia" data-t="0" style="'+st+'" aria-label="'+esc(c[0])+': ninguna">'+inner+'</span>';
+  }).join("");
+  var otras=["__estatal","__extranjero"].filter(function(g){return porG[g];}).map(function(g){
+    return '<a class="chip" href="'+enlace("lista",{ccaa:g,abiertas:"1"})+'">'+nombreGrupo(g)+'<b>'+porG[g]+'</b></a>';}).join("");
+  var altas=nuevasHoy.filter(function(f){return f.encaje==="ALTO";}).length;
+
+  return avisos()
+   +'<h1>Oportunidades abiertas</h1><p class="sub">Búsqueda del '+fechaDia(hoy)+(D.hora?' a las '+esc(D.hora):'')+'. Actualizado '+fechaHora(D.generado)+'.</p>'
+   +'<div class="rejilla"><div>'
+   +'<section class="panel" aria-labelledby="t-mapa"><h2 id="t-mapa">Por comunidad autónoma</h2>'
+   +'<div class="mapa">'+mapa+'</div>'
+   +'<div class="leyenda">Más oscuro, más licitaciones abiertas. <i style="background:var(--mapa1)"></i><i style="background:var(--mapa2)"></i><i style="background:var(--mapa3)"></i><i style="background:var(--mapa4)"></i></div>'
+   +(otras?'<div class="otras">'+otras+'</div>':'')+'</section>'
+   +'<section class="panel"><h2>Cierran en los próximos 7 días</h2>'
+   +(cierran.length?'<div class="lista">'+cierran.slice(0,6).map(filaHTML).join("")+'</div>'+(cierran.length>6?'<p><a href="'+enlace("lista",{orden:"plazo",abiertas:"1"})+'">Ver las '+cierran.length+' que cierran pronto</a></p>':''):'<p class="vacio">Ninguna licitación cierra esta semana.</p>')
+   +'</section></div><div>'
+   +'<section class="panel"><h2>Hoy</h2><div class="cifras">'
+   +'<div class="cifra"><b>'+nuevasHoy.length+'</b><span>nuevas</span></div>'
+   +'<div class="cifra"><b>'+altas+'</b><span>de encaje alto</span></div>'
+   +'<div class="cifra"><b>'+F.filter(function(f){return f.novedad==="Actualizada";}).length+'</b><span>actualizadas</span></div></div>'
+   +'<p class="sub" style="margin:8px 0 0">'+(D.descartadas||0)+' descartadas por poca relevancia · '+(D.conocidas||0)+' ya conocidas.</p></section>'
+   +'<section class="panel"><h2>Novedades</h2>'
+   +(recientes.length?'<div class="lista">'+recientes.slice(0,8).map(filaHTML).join("")+'</div>'+(recientes.length>8?'<p><a href="'+enlace("lista",{novedad:"1"})+'">Ver las '+recientes.length+' novedades</a></p>':'')
+     :'<p class="vacio"><b>Hoy no hay novedades.</b> Cuando el programa encuentre algo nuevo o que haya cambiado, saldrá aquí.</p>')
+   +'</section></div></div>';
+}
+
+function opciones(valores,sel,todas){
+  return '<option value="">'+todas+'</option>'+valores.map(function(v){return '<option value="'+esc(v[0])+'"'+(v[0]===sel?" selected":"")+'>'+esc(v[1])+'</option>';}).join("");
+}
+
+function filtrar(p){
+  var q=normaliza(p.q||"");
+  var r=D.fichas.filter(function(f){
+    if(p.ccaa&&grupo(f)!==p.ccaa)return false;
+    if(p.encaje&&f.encaje!==p.encaje)return false;
+    if(p.abiertas==="1"&&!abiertas(f))return false;
+    if(p.novedad==="1"&&!(f.novedad==="Nueva"||f.novedad==="Actualizada"))return false;
+    if(p.dia&&f.primera!==p.dia&&f.dia!==p.dia)return false;
+    if(p.fuente&&f.fuente!==p.fuente)return false;
+    if(q){var txt=normaliza([f.titulo,f.organo,f.expediente,f.ciudad,f.provincia,(f.palabras||[]).join(" ")].join(" "));
+      if(!q.split(/\s+/).every(function(t){return txt.indexOf(t)>=0;}))return false;}
+    return true;
+  });
+  var o=p.orden||"puntos";
+  r.sort(function(a,b){
+    if(o==="plazo"){var x=a.limite?new Date(a.limite):new Date(8e15),y=b.limite?new Date(b.limite):new Date(8e15);return x-y;}
+    if(o==="importe")return (b.interes!=null?b.interes:(b.presupuesto||0))-(a.interes!=null?a.interes:(a.presupuesto||0));
+    if(o==="reciente")return (b.primera||"").localeCompare(a.primera||"");
+    return b.puntos-a.puntos;
+  });
+  return r;
+}
+
+function vistaLista(p){
+  var fuentes=Array.from(new Set(D.fichas.map(function(f){return f.fuente;}))).sort();
+  var grupos=NOMBRES.concat(["__estatal","__extranjero"]).filter(function(g){return D.fichas.some(function(f){return grupo(f)===g;});});
+  var r=filtrar(p);
+  var h=avisos()+'<h1>'+(p.ccaa?esc(nombreGrupo(p.ccaa)):'Todas las licitaciones')+'</h1><p class="sub">Busca, filtra y ordena. La dirección de esta página guarda tus filtros: puedes copiarla para compartir lo que ves.</p>'
+   +'<form class="filtros" id="filtros" role="search">'
+   +'<label>Buscar<input type="search" name="q" value="'+esc(p.q||"")+'" placeholder="Título, órgano, palabra clave"></label>'
+   +'<label>Comunidad<select name="ccaa">'+opciones(grupos.map(function(g){return [g,nombreGrupo(g)];}),p.ccaa,"Todas")+'</select></label>'
+   +'<label>Encaje<select name="encaje">'+opciones([["ALTO","Alto"],["MEDIO","Medio"]],p.encaje,"Cualquiera")+'</select></label>'
+   +'<label>Fuente<select name="fuente">'+opciones(fuentes.map(function(x){return [x,x];}),p.fuente,"Todas")+'</select></label>'
+   +'<label>Plazo<select name="abiertas">'+opciones([["1","Solo abiertas"]],p.abiertas,"Todas")+'</select></label>'
+   +'<label>Ordenar por<select name="orden">'+opciones([["plazo","Fecha límite"],["importe","Importe"],["reciente","Más recientes"]],p.orden,"Mejor encaje")+'</select></label>'
+   +'<button class="boton" type="submit">Aplicar</button><a class="boton sec" href="#/lista">Quitar filtros</a>'
+   +'<button class="boton sec" type="button" id="csv">Descargar CSV</button></form>'
+   +'<p class="cuenta" aria-live="polite">'+r.length+' de '+D.fichas.length+' licitaciones</p>'
+   +'<section class="panel">'+(r.length?'<div class="lista">'+r.map(filaHTML).join("")+'</div>'
+     :'<p class="vacio"><b>No hay licitaciones con estos filtros.</b> Prueba a quitar alguno o <a href="#/lista">ver todas</a>.</p>')+'</section>';
+  app.innerHTML=h;
+  var fm=document.getElementById("filtros");
+  fm.addEventListener("submit",function(e){e.preventDefault();var np={};new FormData(fm).forEach(function(v,k){np[k]=v;});if(p.novedad)np.novedad=p.novedad;if(p.dia)np.dia=p.dia;location.hash=enlace("lista",np);});
+  document.getElementById("csv").addEventListener("click",function(){descargarCSV(r);});
+  return true;
+}
+
+function descargarCSV(r){
+  var cab=["Encaje","Puntos","Título","Órgano","Comunidad","Provincia","Ciudad","País","Presupuesto","Importe de interés","Fecha límite","Fuente","Palabras clave","Expediente"];
+  function c(v){v=String(v==null?"":v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+  var l=[cab.join(";")].concat(r.map(function(f){return [f.encaje,f.puntos,f.titulo,f.organo,f.ccaa,f.provincia,f.ciudad,f.pais,f.presupuesto,f.interes,f.limite,f.fuente,(f.palabras||[]).join(", "),f.expediente].map(c).join(";");}));
+  var b=new Blob(["﻿"+l.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="licitaciones.csv";document.body.appendChild(a);a.click();a.remove();
+}
+
+function vistaDias(){
+  var h=avisos()+'<h1>Por día de búsqueda</h1><p class="sub">Cada día guarda su Excel y su PDF con lo que se encontró esa jornada.</p><section class="panel">';
+  if(!D.dias.length)return h+'<p class="vacio"><b>Todavía no hay días.</b> Ejecuta el programa para generar el primero.</p></section>';
+  h+='<table class="tabla dias"><thead><tr><th>Día</th><th class="num">Nuevas</th><th class="num">Actualizadas</th><th>Archivos</th></tr></thead><tbody>'
+   +D.dias.map(function(d){return '<tr><td><a href="'+enlace("lista",{dia:d.dia})+'">'+fechaDia(d.dia)+'</a></td><td class="num">'+d.nuevas+'</td><td class="num">'+d.actualizadas+'</td><td>'
+     +(d.excel?'<a href="'+rutaLocal(d.excel)+'">Excel</a>':'')+(d.pdf?'<a href="'+rutaLocal(d.pdf)+'">PDF</a>':'')+(!d.excel&&!d.pdf?'<span class="sub">sin archivos</span>':'')+'</td></tr>';}).join("")
+   +'</tbody></table>'+(D.historico?'<p><a href="'+rutaLocal(D.historico)+'">Abrir el histórico completo (Excel, sin duplicados)</a></p>':'')+'</section>';
+  return h;
+}
+
+var CARGANDO={};
+function cargarFicha(id,ok,mal){
+  if(window.__FICHAS&&window.__FICHAS[id])return ok(window.__FICHAS[id]);
+  var s=document.createElement("script");s.src="datos/f/"+encodeURIComponent(id)+".js";
+  s.onload=function(){window.__FICHAS&&window.__FICHAS[id]?ok(window.__FICHAS[id]):mal();};
+  s.onerror=mal;document.head.appendChild(s);
+}
+
+function fichaHTML(i,f){
+  var pl=plazo(i),url=safeUrl(f.url);
+  var h='<a class="volver" href="javascript:history.back()">Volver</a><div class="ficha-cab">'+etNovedad(f.novedad)+etEncaje(f.encaje)+'<span class="et '+pl.cls+'">'+esc(pl.txt)+'</span></div>'
+   +'<h1>'+esc(f.titulo)+'</h1><p class="sub">'+esc(f.organo)+' · '+esc(lugar(f))+' · '+esc(f.fuente)+(f.expediente?' · Expte. '+esc(f.expediente):'')+'</p>';
+  if(f.cambios)h+='<div class="aviso ojo"><strong>Qué ha cambiado</strong>'+esc(f.cambios)+'</div>';
+  if(f.duplicada_en&&f.duplicada_en.length)h+='<p class="sub">También publicada en: '+f.duplicada_en.map(function(d){var u=safeUrl(d.url);return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(d.fuente)+'</a>':esc(d.fuente);}).join(", ")+'.</p>';
+  h+='<div class="datos">'
+   +'<div class="dato"><span>Presupuesto total</span><b>'+dinero(f.presupuesto)+'</b></div>'
+   +(f.importe_interes!=null&&f.n_lotes>1?'<div class="dato"><span>Lo que te interesa ('+f.n_lotes_interes+' de '+f.n_lotes+' lotes)</span><b>'+dinero(f.importe_interes)+'</b></div>':'')
+   +'<div class="dato"><span>Valor estimado</span><b>'+dinero(f.valor_estimado)+'</b></div>'
+   +'<div class="dato"><span>Fecha límite</span><b>'+fechaHora(f.fecha_limite)+'</b></div>'
+   +'<div class="dato"><span>Publicada</span><b>'+fechaHora(f.fecha_publicacion)+'</b></div>'
+   +'<div class="dato"><span>Tipo y procedimiento</span><b>'+esc([f.tipo,f.procedimiento].filter(Boolean).join(" · ")||"—")+'</b></div>'
+   +'<div class="dato"><span>Duración</span><b>'+esc(f.duracion||"—")+'</b></div>'
+   +'<div class="dato"><span>Puntos de encaje</span><b>'+esc(f.puntos)+'</b></div></div>'
+   +'<p>'+(url?'<a class="boton" href="'+esc(url)+'" target="_blank" rel="noopener">Abrir el anuncio original</a>':'')+'</p>';
+  if(f.descripcion)h+='<section class="panel"><h2>Qué se contrata</h2><p style="margin:0">'+esc(f.descripcion)+'</p></section>';
+  if(f.ia)h+='<section class="panel"><h2>Resumen</h2><p style="margin:0;white-space:pre-line">'+esc(f.ia)+'</p></section>';
+  h+='<section class="panel"><h2>Por qué encaja</h2>'
+   +((f.palabras||[]).length?'<table class="tabla"><thead><tr><th>Palabra clave</th><th>Familia</th><th>Dónde aparece</th></tr></thead><tbody>'+f.palabras.map(function(p){return '<tr><td>'+esc(p.termino)+'</td><td>'+esc(p.grupo)+'</td><td>'+esc(p.donde)+'</td></tr>';}).join("")+'</tbody></table>':'<p class="sub" style="margin:0">Sin palabras clave registradas.</p>')
+   +((f.motivos&&f.motivos.length)?'<p class="sub" style="margin:10px 0 0">'+f.motivos.map(esc).join(" · ")+'</p>':'')+'</section>';
+  if((f.lotes||[]).length>1)h+='<section class="panel"><h2>Lotes</h2><table class="tabla"><thead><tr><th>Lote</th><th>Objeto</th><th class="num">Importe</th><th>Interés</th></tr></thead><tbody>'
+   +f.lotes.map(function(l){return '<tr><td>'+esc(l.numero)+'</td><td>'+esc(l.nombre)+'</td><td class="num">'+dinero(l.presupuesto)+'</td><td>'+(l.interes?'<span class="et alto">Sí</span>':'<span class="et ya">No</span>')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if((f.documentos||[]).length)h+='<section class="panel"><h2>Pliegos</h2><table class="tabla"><tbody>'+f.documentos.map(function(d){
+    var loc=d.ruta_rel?'<a href="'+rutaLocal(d.ruta_rel)+'">'+esc(d.tipo)+' · '+esc(d.nombre)+'</a>':esc(d.tipo+" · "+d.nombre);
+    var u=safeUrl(d.url);return '<tr><td>'+loc+(d.error?'<div class="extracto">'+esc(d.error)+'</div>':'')+'</td><td>'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">Original</a>':'')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if((f.requisitos||[]).length)h+='<section class="panel"><h2>Qué piden y en qué página</h2><table class="tabla"><thead><tr><th>Requisito</th><th>Dónde está</th></tr></thead><tbody>'+f.requisitos.map(function(q){
+    var pags=(q.paginas||[]).map(function(n){return q.ruta_rel?'<a class="pag" href="'+rutaLocal(q.ruta_rel)+'#page='+encodeURIComponent(n)+'">p. '+esc(n)+'</a>':'<span class="pag">p. '+esc(n)+'</span>';}).join("");
+    return '<tr><td><b>'+esc(q.concepto)+'</b><div class="extracto">'+esc(q.documento||"")+'</div></td><td>'+pags+(q.mas?'<span class="sub"> +'+esc(q.mas)+' más</span>':'')+(q.extracto?'<div class="extracto">«'+esc(q.extracto)+'»'+(q.pagina_extracto?' (p. '+esc(q.pagina_extracto)+')':'')+'</div>':'')+'</td></tr>';}).join("")+'</tbody></table></section>';
+  if(f.notas&&f.notas.length)h+='<div class="aviso ojo"><strong>Avisos</strong>'+[].concat(f.notas).map(esc).join("<br>")+'</div>';
+  return h;
+}
+
+function vistaFicha(id){
+  var i=D.fichas.filter(function(x){return x.id===id;})[0];
+  if(!i){app.innerHTML='<p class="vacio"><b>No encontramos esta licitación.</b> Puede haberse retirado del registro. <a href="#/lista">Ver todas</a>.</p>';return;}
+  app.innerHTML='<p class="vacio" aria-live="polite">Cargando la ficha…</p>';
+  cargarFicha(id,function(f){if(location.hash.indexOf(id)<0)return;app.innerHTML=fichaHTML(i,f);window.scrollTo(0,0);},
+    function(){app.innerHTML='<a class="volver" href="#/lista">Volver</a><h1>'+esc(i.titulo)+'</h1><div class="aviso mal" role="alert"><strong>No se pudo cargar el detalle.</strong>Falta el archivo datos/f/'+esc(id)+'.js. Si la carpeta está en OneDrive, comprueba que esté sincronizada en este equipo («Mantener siempre en este dispositivo»).</div>'
+      +'<p>'+esc(i.organo)+' · '+esc(lugar(i))+' · '+dinero(i.presupuesto)+'</p>';});
+}
+
+/* ---------- configuración: palabras clave, grupos (prioridades), exclusiones, CPV y ajustes ----------
+   La web no puede escribir en la carpeta: edita una copia de trabajo (se guarda como borrador en este
+   navegador) y la exporta como config.json. El responsable guarda ese archivo en la carpeta del programa o
+   en la de informes y el programa lo usa en la siguiente ejecución en lugar de palabras_clave.xlsx. */
+var BORRADOR="licitaciones.config.borrador";
+var CF=null,CF_BASE="",CF_META=null,CF_Q="";
+function txt(v){return String(v==null?"":v).trim();}
+function ent(v,d){var n=parseInt(String(v==null?"":v).replace(",","."),10);return isNaN(n)?d:n;}
+function importe(v){if(v==null||txt(v)==="")return null;var n=Number(v);return isFinite(n)?n:null;}
+function tipoDe(t){return normaliza(t)==="exacta"?"Exacta":"Normal";}
+function mismo(a,b){return normaliza(txt(a))===normaliza(txt(b));}
+function canon(d){
+  d=d||{};var a=d.ajustes||{};
+  return {version:1,
+    grupos:(d.grupos||[]).map(function(g){return {nombre:txt(g.nombre),puntos:ent(g.puntos,0),descripcion:txt(g.descripcion)};}).filter(function(g){return g.nombre;}),
+    palabras:(d.palabras||[]).map(function(p){return {grupo:txt(p.grupo),texto:txt(p.texto),tipo:tipoDe(p.tipo),activa:p.activa!==false};}).filter(function(p){return p.texto;}),
+    exclusiones:(d.exclusiones||[]).map(function(x){return {texto:txt(x.texto),tipo:tipoDe(x.tipo),activa:x.activa!==false};}).filter(function(x){return x.texto;}),
+    cpv:(d.cpv||[]).map(function(c){return {prefijo:txt(c.prefijo).replace(/\.0$/,"").replace(/\D/g,""),puntos:ent(c.puntos,0),descripcion:txt(c.descripcion)};}).filter(function(c){return c.prefijo;}),
+    ajustes:{minima:ent(a.minima,25),alto:ent(a.alto,50),tope:ent(a.tope,70),minima_lote:ent(a.minima_lote,20),
+      penalizacion:ent(a.penalizacion,40),importe_min:importe(a.importe_min),importe_max:importe(a.importe_max)}};
+}
+function cargarConfig(ok,mal){
+  if(window.CONFIG)return ok();
+  var s=document.createElement("script");s.src="datos/config.js";
+  s.onload=function(){window.CONFIG?ok():mal();};s.onerror=mal;document.head.appendChild(s);
+}
+function iniciarConfig(){
+  if(CF)return;
+  CF_BASE=JSON.stringify(canon(window.CONFIG.datos));
+  var b=null;try{b=JSON.parse(localStorage.getItem(BORRADOR)||"null");}catch(e){}
+  if(b&&b.datos&&JSON.stringify(canon(b.datos))===CF_BASE){b=null;quitarBorrador();}   // el programa ya lo aplica
+  CF=canon(b&&b.datos?b.datos:window.CONFIG.datos);
+  CF_META=b&&b.datos?{base:b.base||"",fecha:b.fecha||"",exportado:b.exportado||""}:{base:CF_BASE,fecha:"",exportado:""};
+}
+function quitarBorrador(){try{localStorage.removeItem(BORRADOR);}catch(e){}}
+function pendiente(){return JSON.stringify(CF)!==CF_BASE;}
+function guardarBorrador(exportado){
+  CF=canon(CF);
+  if(!pendiente()){quitarBorrador();CF_META={base:CF_BASE,fecha:"",exportado:""};return;}
+  CF_META.fecha=new Date().toISOString();CF_META.exportado=exportado||"";
+  try{localStorage.setItem(BORRADOR,JSON.stringify({base:CF_META.base,fecha:CF_META.fecha,exportado:CF_META.exportado,datos:CF}));}catch(e){}
+}
+
+/* cuadro de diálogo genérico: el primer botón es el principal (Intro); cada acción devuelve un texto si hay error */
+var dlg=document.getElementById("dlg");
+function dialogo(titulo,cuerpo,botones){
+  dlg.innerHTML='<form novalidate><h2 id="dlg-titulo">'+esc(titulo)+'</h2><div>'+cuerpo+'</div><p class="dlg-error" id="dlg-error" role="alert"></p><div class="dlg-botones">'
+    +botones.map(function(b,i){return '<button type="'+(i===0?"submit":"button")+'" class="boton'+(b.cls?" "+b.cls:"")+'" data-b="'+i+'">'+esc(b.txt)+'</button>';}).join("")
+    +'<button type="button" class="boton sec" data-b="x">Cancelar</button></div></form>';
+  var f=dlg.querySelector("form");
+  function ejecutar(i){var r=botones[i].accion(f.elements,f);if(typeof r==="string"){document.getElementById("dlg-error").textContent=r;return;}dlg.close();cambioHecho();}
+  f.addEventListener("submit",function(e){e.preventDefault();ejecutar(0);});
+  f.addEventListener("click",function(e){var b=e.target.closest("button[data-b]");if(!b||b.type==="submit")return;if(b.dataset.b==="x"){dlg.close();return;}ejecutar(+b.dataset.b);});
+  if(typeof dlg.showModal==="function")dlg.showModal();else dlg.setAttribute("open","");
+  var pri=f.querySelector("input:not([type=radio]):not([type=checkbox]),select,textarea");if(pri)pri.focus();
+}
+function cambioHecho(){guardarBorrador();var y=window.scrollY;pintarConfig(parseHash().p);window.scrollTo(0,y);}
+function contarDe(g){var n=0,a=0;CF.palabras.forEach(function(p){if(p.grupo===g){n++;if(p.activa)a++;}});return {n:n,a:a};}
+function radioTipo(t){
+  return '<fieldset class="campo"><legend>Tipo</legend>'
+   +'<label class="op"><input type="radio" name="tipo" value="Normal"'+(t!=="Exacta"?" checked":"")+'><span><b>Normal</b>: acepta terminaciones. «museo» encuentra museos y museográfico. Escribe la raíz.</span></label>'
+   +'<label class="op"><input type="radio" name="tipo" value="Exacta"'+(t==="Exacta"?" checked":"")+'><span><b>Exacta</b>: solo la palabra completa. Para siglas cortas (VR, CMS, app) que aparecerían dentro de otras palabras.</span></label></fieldset>';
+}
+function valorTipo(e){var r=[].filter.call(e.tipo?(e.tipo.length!=null?e.tipo:[e.tipo]):[],function(x){return x.checked;})[0];return r?r.value:"Normal";}
+
+/* ---- grupos ---- */
+function dlgGrupo(i){
+  var g=i==null?{nombre:"",puntos:30,descripcion:""}:CF.grupos[i],c=i==null?{n:0}:contarDe(g.nombre);
+  dialogo(i==null?"Nuevo grupo":"Editar grupo",
+    '<label class="campo">Nombre del grupo<input name="nombre" maxlength="80" value="'+esc(g.nombre)+'"></label>'
+   +'<label class="campo">Puntos (prioridad)<input name="puntos" type="number" min="0" max="200" step="1" value="'+esc(g.puntos)+'"><small>Si en una licitación aparece cualquier palabra del grupo, suma estos puntos (una sola vez por grupo). Más puntos, más prioridad.</small></label>'
+   +'<label class="campo">Descripción (opcional)<input name="descripcion" maxlength="200" value="'+esc(g.descripcion)+'"></label>'
+   +(c.n?'<p class="sub" style="margin:0">Si cambias el nombre, sus '+c.n+' palabras pasan al nombre nuevo.</p>':''),
+    [{txt:"Guardar",accion:function(e){
+      var nom=txt(e.nombre.value),pts=ent(e.puntos.value,NaN);
+      if(!nom)return "Escribe un nombre.";
+      if(isNaN(pts)||pts<0||pts>200)return "Los puntos deben ser un número entre 0 y 200.";
+      if(CF.grupos.some(function(x,j){return j!==i&&mismo(x.nombre,nom);}))return "Ya hay un grupo con ese nombre.";
+      var nuevo={nombre:nom,puntos:pts,descripcion:txt(e.descripcion.value)};
+      if(i==null){CF.grupos.push(nuevo);return;}
+      var viejo=CF.grupos[i].nombre;
+      if(viejo!==nom)CF.palabras.forEach(function(p){if(p.grupo===viejo)p.grupo=nom;});   // en cascada
+      CF.grupos[i]=nuevo;
+    }}]);
+}
+function dlgBorrarGrupo(i){
+  var g=CF.grupos[i],c=contarDe(g.nombre),otros=CF.grupos.filter(function(x,j){return j!==i;});
+  if(!c.n){dialogo("¿Borrar el grupo «"+g.nombre+"»?",'<p>No tiene palabras clave.</p>',[{txt:"Borrar grupo",cls:"peligro",accion:function(){CF.grupos.splice(i,1);}}]);return;}
+  dialogo("Borrar el grupo «"+g.nombre+"»",
+    '<p>Este grupo tiene <b>'+c.n+'</b> palabra'+(c.n>1?'s':'')+' clave. ¿Qué hacemos con ellas?</p>'
+   +'<label class="op"><input type="radio" name="dest" value="mover"'+(otros.length?' checked':' disabled')+'><span>Pasarlas al grupo'
+   +(otros.length?'<select name="a" aria-label="Grupo de destino">'+otros.map(function(x){return '<option>'+esc(x.nombre)+'</option>';}).join("")+'</select>':' (no hay otro grupo)')+'</span></label>'
+   +'<label class="op"><input type="radio" name="dest" value="borrar"'+(otros.length?'':' checked')+'><span>Borrarlas también</span></label>',
+    [{txt:"Borrar grupo",cls:"peligro",accion:function(e){
+      var mover=otros.length&&[].filter.call(e.dest,function(x){return x.checked;})[0].value==="mover";
+      if(mover){
+        var a=e.a.value;
+        CF.palabras=CF.palabras.filter(function(p){
+          if(p.grupo!==g.nombre)return true;
+          if(CF.palabras.some(function(q){return q.grupo===a&&mismo(q.texto,p.texto);}))return false;   // ya estaba en el destino
+          p.grupo=a;return true;});
+      }else CF.palabras=CF.palabras.filter(function(p){return p.grupo!==g.nombre;});
+      CF.grupos.splice(CF.grupos.indexOf(g),1);
+    }}]);
+}
+
+/* ---- palabras clave y exclusiones (misma forma; las exclusiones no tienen grupo) ---- */
+function dlgTermino(lista,i,conGrupo,grupoPorDefecto){
+  if(conGrupo&&!CF.grupos.length){dialogo("Primero crea un grupo",'<p>Cada palabra clave pertenece a un grupo. Crea uno en la pestaña Grupos.</p>',[{txt:"Entendido",accion:function(){}}]);return;}
+  var t=i==null?{grupo:grupoPorDefecto||(CF.grupos[0]||{}).nombre,texto:"",tipo:"Normal",activa:true}:lista[i];
+  var nombre=conGrupo?"palabra clave":"exclusión";
+  dialogo((i==null?"Nueva ":"Editar ")+nombre,
+    (conGrupo?'<label class="campo">Grupo<select name="grupo">'+CF.grupos.map(function(g){return '<option'+(g.nombre===t.grupo?' selected':'')+'>'+esc(g.nombre)+'</option>';}).join("")+'</select></label>':'')
+   +'<label class="campo">Palabra o expresión<input name="texto" maxlength="80" value="'+esc(t.texto)+'"><small>No importan mayúsculas ni tildes.</small></label>'
+   +radioTipo(t.tipo)
+   +'<label class="op"><input type="checkbox" name="activa"'+(t.activa?' checked':'')+'><span>Activa (desmárcala para dejar de buscarla sin borrarla)</span></label>',
+    [{txt:"Guardar",accion:function(e){
+      var tx=txt(e.texto.value),gr=conGrupo?e.grupo.value:"",tp=valorTipo(e);
+      if(!tx)return "Escribe la palabra o expresión.";
+      if(lista.some(function(x,j){return j!==i&&mismo(x.texto,tx)&&(!conGrupo||x.grupo===gr);}))return "«"+tx+"» ya está "+(conGrupo?"en el grupo «"+gr+"»":"en las exclusiones")+".";
+      if(tp==="Normal"&&normaliza(tx).replace(/\s/g,"").length<=3&&!e.__avisado){e.__avisado=true;return "Es muy corta: como «Normal» puede aparecer dentro de otras palabras. Pulsa Guardar otra vez si quieres dejarla así, o elige «Exacta».";}
+      var n=conGrupo?{grupo:gr,texto:tx,tipo:tp,activa:e.activa.checked}:{texto:tx,tipo:tp,activa:e.activa.checked};
+      if(i==null)lista.push(n);else lista[i]=n;
+    }}]);
+}
+function dlgBorrarTermino(lista,i,conGrupo){
+  var t=lista[i],otros=[];
+  CF.palabras.forEach(function(p){if(p!==t&&mismo(p.texto,t.texto))otros.push("grupo «"+p.grupo+"»");});
+  CF.exclusiones.forEach(function(x){if(x!==t&&mismo(x.texto,t.texto))otros.push("exclusiones");});
+  otros=otros.filter(function(x,k,a){return a.indexOf(x)===k;});
+  var aqui=conGrupo?"del grupo «"+t.grupo+"»":"de las exclusiones";
+  function soloAqui(){lista.splice(lista.indexOf(t),1);}
+  if(!otros.length){dialogo("¿Borrar «"+t.texto+"»?",'<p>Se quita '+esc(aqui)+'. Si solo quieres dejar de buscarla, desmarca «Activa».</p>',[{txt:"Borrar",cls:"peligro",accion:soloAqui}]);return;}
+  dialogo("Borrar «"+t.texto+"»",'<p>Esta palabra también está en: <b>'+otros.map(esc).join(", ")+'</b>.</p>',
+    [{txt:"Borrarla de todas partes",cls:"peligro",accion:function(){
+        CF.palabras=CF.palabras.filter(function(p){return !mismo(p.texto,t.texto);});
+        CF.exclusiones=CF.exclusiones.filter(function(x){return !mismo(x.texto,t.texto);});}},
+     {txt:"Solo "+aqui,cls:"sec",accion:soloAqui}]);
+}
+
+/* ---- CPV ---- */
+function dlgCpv(i){
+  var c=i==null?{prefijo:"",puntos:25,descripcion:""}:CF.cpv[i];
+  dialogo(i==null?"Nuevo código CPV":"Editar código CPV",
+    '<label class="campo">Inicio del código CPV<input name="prefijo" inputmode="numeric" maxlength="8" value="'+esc(c.prefijo)+'"><small>El prefijo «72» cubre todos los 72xxxxxx. Si una licitación tiene varios, cuenta el de más puntos.</small></label>'
+   +'<label class="campo">Puntos<input name="puntos" type="number" min="0" max="200" value="'+esc(c.puntos)+'"></label>'
+   +'<label class="campo">Descripción<input name="descripcion" maxlength="120" value="'+esc(c.descripcion)+'"></label>',
+    [{txt:"Guardar",accion:function(e){
+      var p=txt(e.prefijo.value).replace(/\s/g,""),pts=ent(e.puntos.value,NaN);
+      if(!/^\d{1,8}$/.test(p))return "El código solo puede tener cifras (de 1 a 8).";
+      if(isNaN(pts)||pts<0||pts>200)return "Los puntos deben ser un número entre 0 y 200.";
+      if(CF.cpv.some(function(x,j){return j!==i&&x.prefijo===p;}))return "Ese código ya está en la lista.";
+      var n={prefijo:p,puntos:pts,descripcion:txt(e.descripcion.value)};
+      if(i==null)CF.cpv.push(n);else CF.cpv[i]=n;
+    }}]);
+}
+
+/* ---- vistas de cada pestaña ---- */
+function filasTerminos(lista,conGrupo,filtroG){
+  var q=normaliza(CF_Q);
+  var filas=lista.map(function(t,i){return {t:t,i:i};}).filter(function(x){
+    return (!filtroG||x.t.grupo===filtroG)&&(!q||normaliza(x.t.texto).indexOf(q)>=0||(conGrupo&&normaliza(x.t.grupo).indexOf(q)>=0));});
+  var tipo=conGrupo?"pal":"exc";
+  if(!filas.length)return '<tr><td colspan="'+(conGrupo?5:4)+'" class="vacio">'+(lista.length?'Nada coincide con la búsqueda.':'Todavía no hay ninguna.')+'</td></tr>';
+  return filas.map(function(x){var t=x.t;
+    return '<tr class="'+(t.activa?'':'inactiva')+'"><td><input type="checkbox" data-acc="'+tipo+'-activa" data-i="'+x.i+'"'+(t.activa?' checked':'')+' aria-label="Activa: '+esc(t.texto)+'"></td>'
+     +'<td class="txt"><b>'+esc(t.texto)+'</b></td>'+(conGrupo?'<td>'+esc(t.grupo)+'</td>':'')+'<td>'+esc(t.tipo)+'</td>'
+     +'<td class="acc"><button type="button" class="mini" data-acc="'+tipo+'-editar" data-i="'+x.i+'">Editar</button> <button type="button" class="mini peligro" data-acc="'+tipo+'-borrar" data-i="'+x.i+'">Borrar</button></td></tr>';}).join("");
+}
+function pestanaGrupos(){
+  var h='<div class="acciones"><p class="sub crece" style="margin:0">Cada grupo es una familia de servicios. Sus puntos marcan la prioridad.</p><button type="button" class="boton" data-acc="grupo-nuevo">Nuevo grupo</button></div>';
+  if(!CF.grupos.length)return h+'<section class="panel"><p class="vacio"><b>No hay grupos.</b> Crea el primero para poder añadir palabras clave.</p></section>';
+  return h+'<section class="panel tabla-mov"><table class="tabla"><thead><tr><th>Grupo</th><th class="num">Puntos</th><th>Descripción</th><th class="num">Palabras</th><th></th></tr></thead><tbody>'
+   +CF.grupos.map(function(g,i){var c=contarDe(g.nombre);
+     return '<tr><td><b>'+esc(g.nombre)+'</b></td><td class="num">'+esc(g.puntos)+'</td><td>'+esc(g.descripcion)+'</td>'
+      +'<td class="num"><a href="'+enlace("config",{p:"palabras",g:g.nombre})+'">'+c.a+(c.n!==c.a?' de '+c.n:'')+'</a></td>'
+      +'<td class="acc"><button type="button" class="mini" data-acc="grupo-editar" data-i="'+i+'">Editar</button> <button type="button" class="mini peligro" data-acc="grupo-borrar" data-i="'+i+'">Borrar</button></td></tr>';}).join("")
+   +'</tbody></table></section>';
+}
+function pestanaPalabras(g){
+  var hayG=g&&CF.grupos.some(function(x){return x.nombre===g;});if(!hayG)g="";
+  return '<div class="acciones"><input type="search" id="cf-q" placeholder="Buscar palabra" value="'+esc(CF_Q)+'" aria-label="Buscar palabra">'
+   +'<select id="cf-g" aria-label="Filtrar por grupo"><option value="">Todos los grupos</option>'+CF.grupos.map(function(x){return '<option'+(x.nombre===g?' selected':'')+'>'+esc(x.nombre)+'</option>';}).join("")+'</select>'
+   +'<span class="crece"></span><button type="button" class="boton" data-acc="pal-nueva" data-g="'+esc(g)+'">Nueva palabra</button></div>'
+   +'<section class="panel tabla-mov"><table class="tabla"><thead><tr><th>Activa</th><th>Palabra o expresión</th><th>Grupo</th><th>Tipo</th><th></th></tr></thead><tbody id="cf-filas">'
+   +filasTerminos(CF.palabras,true,g)+'</tbody></table></section>';
+}
+function pestanaExclusiones(){
+  return '<div class="acciones"><p class="sub crece" style="margin:0">Si aparecen, restan '+esc(CF.ajustes.penalizacion)+' puntos (se cambia en Ajustes). Sirven para descartar obras, limpieza, etc.</p><button type="button" class="boton" data-acc="exc-nueva">Nueva exclusión</button></div>'
+   +'<div class="acciones"><input type="search" id="cf-q" placeholder="Buscar" value="'+esc(CF_Q)+'" aria-label="Buscar exclusión"></div>'
+   +'<section class="panel tabla-mov"><table class="tabla"><thead><tr><th>Activa</th><th>Palabra o expresión</th><th>Tipo</th><th></th></tr></thead><tbody id="cf-filas">'
+   +filasTerminos(CF.exclusiones,false,"")+'</tbody></table></section>';
+}
+function pestanaCpv(){
+  return '<div class="acciones"><p class="sub crece" style="margin:0">Códigos de clasificación oficiales que suman puntos.</p><button type="button" class="boton" data-acc="cpv-nuevo">Nuevo código</button></div>'
+   +'<section class="panel tabla-mov"><table class="tabla"><thead><tr><th>Prefijo</th><th class="num">Puntos</th><th>Descripción</th><th></th></tr></thead><tbody>'
+   +(CF.cpv.length?CF.cpv.map(function(c,i){return '<tr><td><b>'+esc(c.prefijo)+'</b></td><td class="num">'+esc(c.puntos)+'</td><td>'+esc(c.descripcion)+'</td>'
+      +'<td class="acc"><button type="button" class="mini" data-acc="cpv-editar" data-i="'+i+'">Editar</button> <button type="button" class="mini peligro" data-acc="cpv-borrar" data-i="'+i+'">Borrar</button></td></tr>';}).join("")
+     :'<tr><td colspan="4" class="vacio">No hay códigos CPV.</td></tr>')
+   +'</tbody></table></section>';
+}
+var AJUSTES=[["minima","Puntuación mínima para que aparezca en el informe","Por debajo, la licitación se descarta."],
+ ["alto","Puntuación a partir de la cual el encaje es ALTO","Entre la mínima y esta, el encaje es MEDIO."],
+ ["tope","Tope de puntos que pueden dar las palabras clave","Evita que muchas palabras seguidas lo disparen todo."],
+ ["minima_lote","Puntuación mínima para que un lote sea de interés","Se calcula con el texto y el CPV de cada lote."],
+ ["penalizacion","Penalización por palabra de exclusión","Puntos que se restan si aparece una exclusión."],
+ ["importe_min","Importe mínimo en euros","Presupuesto sin IVA. Vacío = sin límite. Resta puntos si es menor."],
+ ["importe_max","Importe máximo en euros","Presupuesto sin IVA. Vacío = sin límite. Resta puntos si es mayor."]];
+function pestanaAjustes(){
+  var a=CF.ajustes;
+  return '<section class="panel"><form id="cf-ajustes" novalidate><div class="ajustes">'
+   +AJUSTES.map(function(x){var v=a[x[0]];return '<label class="campo">'+esc(x[1])+'<input name="'+x[0]+'" type="number" min="0" step="1" value="'+(v==null?'':esc(v))+'"><small>'+esc(x[2])+'</small></label>';}).join("")
+   +'</div><p class="dlg-error" id="cf-ajustes-error" role="alert"></p><button type="submit" class="boton">Aplicar ajustes</button></form></section>';
+}
+function aplicarAjustes(f){
+  var e=f.elements,n={},err="";
+  AJUSTES.forEach(function(x){var v=txt(e[x[0]].value);
+    if(x[0].indexOf("importe")===0){n[x[0]]=v===""?null:Number(v);if(v!==""&&!(n[x[0]]>=0))err="Los importes deben ser números positivos o quedar vacíos.";}
+    else{n[x[0]]=ent(v,NaN);if(isNaN(n[x[0]])||n[x[0]]<0)err="«"+x[1]+"» debe ser un número igual o mayor que 0.";}});
+  if(!err&&n.alto<n.minima)err="La puntuación de encaje ALTO no puede ser menor que la mínima.";
+  if(!err&&n.importe_min!=null&&n.importe_max!=null&&n.importe_max<n.importe_min)err="El importe máximo no puede ser menor que el mínimo.";
+  if(err){document.getElementById("cf-ajustes-error").textContent=err;return;}
+  CF.ajustes=n;cambioHecho();
+}
+
+function exportarConfig(){
+  var salida=canon(CF);salida.guardado=new Date().toISOString().slice(0,16);
+  salida.nota="Exportado desde la web de licitaciones. Guárdalo en la carpeta del programa o en la de informes con el nombre config.json.";
+  var b=new Blob([JSON.stringify(salida,null,1)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=(window.CONFIG.archivo||"config.json");document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+  guardarBorrador(new Date().toISOString());
+  var y=window.scrollY;pintarConfig(parseHash().p);window.scrollTo(0,y);
+}
+function importarConfig(archivo){
+  var r=new FileReader();
+  r.onload=function(){
+    var d;try{d=JSON.parse(String(r.result).replace(/^﻿/,""));}catch(e){d=null;}
+    if(!d||!Array.isArray(d.grupos)||!Array.isArray(d.palabras)){dialogo("No se puede importar",'<p>El archivo no es un config.json válido (le faltan los grupos o las palabras).</p>',[{txt:"Entendido",accion:function(){}}]);return;}
+    CF=canon(d);CF_META={base:CF_BASE,fecha:"",exportado:""};cambioHecho();
+  };
+  r.readAsText(archivo,"utf-8");
+}
+
+function pintarConfig(p){
+  p=p||{};var pes=p.p||"grupos",I=window.CONFIG,h=avisos();
+  h+='<h1>Configuración</h1><p class="sub">Qué busca el programa y cuántos puntos da cada cosa. Ahora mismo usa <b>'+esc(I.origen||"—")+'</b> ('+esc(I.donde||"")+(I.modificado?', guardado el '+fechaHora(I.modificado):'')+').</p>';
+  if((I.avisos||[]).length)h+='<div class="aviso ojo"><strong>Avisos del programa al leer la configuración</strong>'+I.avisos.map(esc).join("<br>")+'</div>';
+  if(pendiente()){
+    if(CF_META.base&&CF_META.base!==CF_BASE)h+='<div class="aviso mal" role="alert"><strong>La configuración del programa ha cambiado desde que empezaste estos cambios.</strong>Puede que otra persona haya exportado la suya. Si exportas la tuya, sustituirá a la de esa persona. Si prefieres partir de la actual, pulsa «Descartar mis cambios».</div>';
+    h+='<div class="aviso ojo"><strong>'+(CF_META.exportado?'Exportaste config.json el '+fechaHora(CF_META.exportado)+'. Falta un paso:':'Tienes cambios sin aplicar.')+'</strong>'
+     +(CF_META.exportado?'<ol class="paso"><li>Busca <code>config.json</code> en tu carpeta de Descargas (si el navegador le ha puesto «(1)», quítaselo).</li><li>Muévelo a la carpeta de informes (donde está esta página) o a la carpeta del programa, y sustituye el anterior.</li><li>Se aplicará en la próxima ejecución. Para revisar de nuevo lo de los últimos días: <code>py licitaciones.py --dias 7 --todo</code>.</li></ol>'
+       :'Se guardan solo en este navegador hasta que exportes el archivo <code>config.json</code> y lo coloques en la carpeta.')
+     +'<div class="acciones" style="margin:10px 0 0"><button type="button" class="boton" data-acc="exportar">'+(CF_META.exportado?'Exportar otra vez':'Exportar config.json')+'</button><button type="button" class="boton sec" data-acc="descartar">Descartar mis cambios</button></div></div>';
+  }
+  var n={grupos:CF.grupos.length,palabras:CF.palabras.length,exclusiones:CF.exclusiones.length,cpv:CF.cpv.length};
+  var PES=[["grupos","Grupos"],["palabras","Palabras clave"],["exclusiones","Exclusiones"],["cpv","CPV"],["ajustes","Ajustes"]];
+  h+='<nav class="pestanas" aria-label="Apartados de la configuración">'+PES.map(function(x){return '<a href="'+enlace("config",{p:x[0]})+'"'+(x[0]===pes?' aria-current="page"':'')+'>'+x[1]+(n[x[0]]!=null?'<span>'+n[x[0]]+'</span>':'')+'</a>';}).join("")+'</nav>';
+  h+=pes==="palabras"?pestanaPalabras(p.g):pes==="exclusiones"?pestanaExclusiones():pes==="cpv"?pestanaCpv():pes==="ajustes"?pestanaAjustes():pestanaGrupos();
+  h+='<p class="pie">Solo quien tenga permiso de escritura en la carpeta puede aplicar los cambios. '
+   +(pendiente()?'':'<button type="button" class="mini" data-acc="exportar">Exportar config.json</button> ')
+   +'<button type="button" class="mini" data-acc="importar">Importar un config.json</button><input type="file" id="cf-archivo" accept=".json,application/json" hidden></p>';
+  app.innerHTML=h;
+  var fa=document.getElementById("cf-ajustes");if(fa)fa.addEventListener("submit",function(e){e.preventDefault();aplicarAjustes(fa);});
+  var q=document.getElementById("cf-q");
+  if(q)q.addEventListener("input",function(){CF_Q=q.value;var fg=document.getElementById("cf-g");
+    document.getElementById("cf-filas").innerHTML=pes==="palabras"?filasTerminos(CF.palabras,true,fg?fg.value:""):filasTerminos(CF.exclusiones,false,"");});
+  var g=document.getElementById("cf-g");
+  if(g)g.addEventListener("change",function(){location.hash=enlace("config",{p:"palabras",g:g.value});});
+  var fi=document.getElementById("cf-archivo");
+  if(fi)fi.addEventListener("change",function(){if(fi.files[0])importarConfig(fi.files[0]);});
+}
+app.addEventListener("click",function(e){
+  var b=e.target.closest("[data-acc]");if(!b||!CF)return;
+  var acc=b.dataset.acc,i=b.dataset.i!=null?+b.dataset.i:null;
+  if(acc==="grupo-nuevo")dlgGrupo(null);
+  else if(acc==="grupo-editar")dlgGrupo(i);
+  else if(acc==="grupo-borrar")dlgBorrarGrupo(i);
+  else if(acc==="pal-nueva")dlgTermino(CF.palabras,null,true,b.dataset.g);
+  else if(acc==="pal-editar")dlgTermino(CF.palabras,i,true);
+  else if(acc==="pal-borrar")dlgBorrarTermino(CF.palabras,i,true);
+  else if(acc==="exc-nueva")dlgTermino(CF.exclusiones,null,false);
+  else if(acc==="exc-editar")dlgTermino(CF.exclusiones,i,false);
+  else if(acc==="exc-borrar")dlgBorrarTermino(CF.exclusiones,i,false);
+  else if(acc==="pal-activa"){CF.palabras[i].activa=b.checked;cambioHecho();}
+  else if(acc==="exc-activa"){CF.exclusiones[i].activa=b.checked;cambioHecho();}
+  else if(acc==="cpv-nuevo")dlgCpv(null);
+  else if(acc==="cpv-editar")dlgCpv(i);
+  else if(acc==="cpv-borrar"){var c=CF.cpv[i];dialogo("¿Borrar el código "+c.prefijo+"?",'<p>'+esc(c.descripcion||"Sin descripción")+' · '+esc(c.puntos)+' puntos.</p>',[{txt:"Borrar",cls:"peligro",accion:function(){CF.cpv.splice(i,1);}}]);}
+  else if(acc==="exportar")exportarConfig();
+  else if(acc==="importar")document.getElementById("cf-archivo").click();
+  else if(acc==="descartar")dialogo("¿Descartar tus cambios?",'<p>Se vuelve a la configuración que usa ahora el programa. No se puede deshacer.</p>',[{txt:"Descartar",cls:"peligro",accion:function(){CF=canon(window.CONFIG.datos);}}]);
+});
+function vistaConfig(p){
+  if(CF){pintarConfig(p);return;}
+  app.innerHTML='<p class="vacio" aria-live="polite">Cargando la configuración…</p>';
+  cargarConfig(function(){iniciarConfig();if(parseHash().ruta[0]==="config")pintarConfig(parseHash().p);},
+    function(){app.innerHTML='<h1>Configuración</h1><div class="aviso mal" role="alert"><strong>No se encuentra datos/config.js.</strong>Lo genera el programa. Ejecuta <code>py licitaciones.py --solo-web</code> y vuelve a abrir esta página.</div>';});
+}
+
+/* ---------- arranque ---------- */
+function marcaMenu(v){[].forEach.call(document.querySelectorAll("nav.menu a"),function(a){if(a.dataset.v===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});}
+function pintar(){
+  var h=parseHash(),r=h.ruta;
+  if(!D){app.innerHTML='<div class="aviso mal" role="alert"><strong>Todavía no hay datos.</strong>No se encuentra datos/indice.js. Ejecuta el programa (licitaciones.py) para generarlos y abre esta página desde la misma carpeta.</div>';return;}
+  document.title="Licitaciones"+(D.empresa?" · "+D.empresa:"");
+  if(r[0]==="l"&&r[1]){marcaMenu("");vistaFicha(r[1]);return;}
+  if(r[0]==="lista"){marcaMenu("lista");vistaLista(h.p);window.scrollTo(0,0);return;}
+  if(r[0]==="dias"){marcaMenu("dias");app.innerHTML=vistaDias();window.scrollTo(0,0);return;}
+  if(r[0]==="config"){marcaMenu("config");vistaConfig(h.p);window.scrollTo(0,0);return;}
+  marcaMenu("inicio");app.innerHTML=vistaInicio();window.scrollTo(0,0);
+}
+if(D)document.getElementById("empresa").textContent=D.empresa||"";
+var raizTema=document.documentElement;
+try{var t=localStorage.getItem("tema");if(t)raizTema.setAttribute("data-tema",t);}catch(e){}
+document.getElementById("tema").addEventListener("click",function(){
+  var osc=raizTema.getAttribute("data-tema")==="oscuro"||(!raizTema.getAttribute("data-tema")&&matchMedia("(prefers-color-scheme:dark)").matches);
+  var n=osc?"claro":"oscuro";raizTema.setAttribute("data-tema",n);try{localStorage.setItem("tema",n);}catch(e){}
+});
+window.addEventListener("hashchange",pintar);
+pintar();
+})();
+</script>
+</body>
+</html>
