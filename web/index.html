@@ -16,6 +16,7 @@
   --ama:#a7863e; --ama-bg:#f8f0bd; --ama-tx:#473515;
   --cor:#d6786b; --cor-bg:#f9eeed; --cor-tx:#843c34;
   --alerta:#843c34; --alerta-fondo:#f9eeed; --bien:#253d3c; --bien-fondo:#c5f8f9;
+  --si:#15a34a; --si-bg:#dcfce7; --si-tx:#14532d; --no:#dc2626; --no-bg:#fee2e2; --no-tx:#7f1d1d;
   --mapa0:#e9ebf3; --mapa1:#cce0ff; --mapa2:#80b2ff; --mapa3:#0066ff; --mapa4:#031a34;
   --g1:#0066ff; --g2:#b86be8; --g3:#c48349; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#528889; --g8:#6e7894;
   --sombra:0 1px 2px rgba(3,26,52,.05),0 6px 18px rgba(3,26,52,.05);
@@ -30,6 +31,7 @@
   --ama:#e4c35c; --ama-bg:#473515; --ama-tx:#f3e996;
   --cor:#d6786b; --cor-bg:#491818; --cor-tx:#f2b1a5;
   --alerta:#f2b1a5; --alerta-fondo:#491818; --bien:#c5f8f9; --bien-fondo:#1c4447;
+  --si:#4ade80; --si-bg:#14432a; --si-tx:#bbf7d0; --no:#f87171; --no-bg:#4a1717; --no-tx:#fecaca;
   --mapa0:#17304f; --mapa1:#1d4278; --mapa2:#2a6bd0; --mapa3:#5b9bff; --mapa4:#b8d4ff;
   --g1:#4d94ff; --g2:#b86be8; --g3:#f4c495; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#8fc9cf; --g8:#8f97af;
   --sombra:0 1px 2px rgba(0,0,0,.3);
@@ -44,6 +46,7 @@
     --ama:#e4c35c; --ama-bg:#473515; --ama-tx:#f3e996;
     --cor:#d6786b; --cor-bg:#491818; --cor-tx:#f2b1a5;
     --alerta:#f2b1a5; --alerta-fondo:#491818; --bien:#c5f8f9; --bien-fondo:#1c4447;
+    --si:#4ade80; --si-bg:#14432a; --si-tx:#bbf7d0; --no:#f87171; --no-bg:#4a1717; --no-tx:#fecaca;
     --mapa0:#17304f; --mapa1:#1d4278; --mapa2:#2a6bd0; --mapa3:#5b9bff; --mapa4:#b8d4ff;
     --g1:#4d94ff; --g2:#b86be8; --g3:#f4c495; --g4:#75c0c7; --g5:#d6786b; --g6:#e4c35c; --g7:#8fc9cf; --g8:#8f97af;
     --sombra:0 1px 2px rgba(0,0,0,.3);
@@ -194,6 +197,19 @@ h3{font-size:15px;margin:0 0 6px}
 .boton:hover{filter:brightness(1.08)}
 .boton.sec{background:none;color:var(--marca)}
 .boton.sec:hover{background:var(--marca-fondo);filter:none}
+.acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
+.acciones .boton{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600}
+.acciones .boton svg{width:18px;height:18px;flex:none}
+.interes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pulgar{display:inline-flex;align-items:center;gap:7px;border-radius:8px;padding:7px 13px;
+        font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pulgar svg{width:17px;height:17px;flex:none;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pulgar.si{border:1px solid var(--si);background:var(--si-bg);color:var(--si-tx)}
+.pulgar.si svg{stroke:var(--si)}
+.pulgar.no{border:1px solid var(--no);background:var(--no-bg);color:var(--no-tx)}
+.pulgar.no svg{stroke:var(--no)}
+.pulgar:hover{filter:brightness(1.05)}
+@media (max-width:700px){.interes{margin-left:0;width:100%}}
 .cuenta{color:var(--suave);margin:0 0 8px}
 
 /* ficha */
@@ -460,8 +476,207 @@ function cargarFicha(id,ok,mal){
   s.onerror=mal;document.head.appendChild(s);
 }
 
+/* ---------- compartir la licitación por correo ----------
+   Un enlace mailto: solo admite texto plano, así que el cuerpo se arma aquí en
+   HTML con tablas y estilos en línea: es lo único que respeta el motor de Word
+   con el que Outlook pinta los mensajes. Se entrega por el protocolo
+   «licitaciones:» (abre Outlook de un clic) y, si no está registrado en el
+   equipo, como archivo .eml con la cabecera X-Unsent, que Outlook abre como
+   mensaje nuevo. */
+var FICHA_VISTA=null;
+var ICO={
+  sobre:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  copia:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  si:'<svg viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>',
+  no:'<svg viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>'
+};
+var TIPO_CORREO="font-family:Segoe UI,Arial,sans-serif";
+
+function correoCelda(k,v,azul){
+  if(!v||v==="—")return "";
+  return '<td width="33%" valign="top" style="padding:0 6px 12px 0;">'
+   +'<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e3e8ef;background:#f7f9fc;">'
+   +'<tr><td style="padding:10px 12px;">'
+   +'<div style="'+TIPO_CORREO+';font-size:8.5pt;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;padding-bottom:3px;">'+esc(k)+'</div>'
+   +'<div style="'+TIPO_CORREO+';font-size:'+(azul?"13pt":"11pt")+';font-weight:bold;color:'+(azul?"#0066ff":"#111827")+';">'+esc(v)+'</div>'
+   +'</td></tr></table></td>';
+}
+
+function correoEtiqueta(txt,fondo,tinta){
+  return '<td bgcolor="'+fondo+'" style="padding:4px 10px;'+TIPO_CORREO+';font-size:8.5pt;font-weight:bold;color:'+tinta+';">'+esc(txt)+'</td><td width="8"></td>';
+}
+
+function correoHTML(){
+  var f=FICHA_VISTA.f,i=FICHA_VISTA.i,url=safeUrl(f.url);
+
+  var etiquetas="";
+  if(f.novedad==="Nueva")etiquetas+=correoEtiqueta("Nueva","#f1e0fa","#471551");
+  else if(f.novedad==="Actualizada")etiquetas+=correoEtiqueta("Actualizada","#c5f8f9","#253d3c");
+  if(f.encaje==="ALTO")etiquetas+=correoEtiqueta("Encaje alto","#fce3cd","#63442a");
+  else if(f.encaje==="MEDIO")etiquetas+=correoEtiqueta("Encaje medio","#f8f0bd","#473515");
+
+  var datos=[
+    ["Presupuesto total",dinero(f.presupuesto),true],
+    ["Valor estimado",dinero(f.valor_estimado),false],
+    ["Fecha límite",fechaHora(f.fecha_limite),false],
+    ["Publicada",fechaHora(f.fecha_publicacion),false],
+    ["Tipo y procedimiento",[f.tipo,f.procedimiento].filter(Boolean).join(" · "),false],
+    ["Duración",f.duracion,false],
+    ["Puntos de encaje",String(f.puntos),false]
+  ].filter(function(d){return d[1]&&d[1]!=="—";});
+  if(f.importe_interes!=null&&f.n_lotes>1)
+    datos.splice(1,0,["Lo que te interesa ("+f.n_lotes_interes+" de "+f.n_lotes+" lotes)",dinero(f.importe_interes),true]);
+
+  var filas="",n;
+  for(n=0;n<datos.length;n+=3){
+    var tres=datos.slice(n,n+3);
+    filas+="<tr>"+tres.map(function(d){return correoCelda(d[0],d[1],d[2]);}).join("")
+      +(tres.length<3?'<td width="'+(33*(3-tres.length))+'%"></td>':"")+"</tr>";
+  }
+
+  var palabras=(f.palabras||[]).map(function(p){
+    return '<tr>'
+     +'<td style="padding:5px 10px;border-bottom:1px solid #eef1f6;'+TIPO_CORREO+';font-size:10.5pt;"><strong>'+esc(p.termino)+'</strong></td>'
+     +'<td style="padding:5px 10px;border-bottom:1px solid #eef1f6;'+TIPO_CORREO+';font-size:10.5pt;color:#374151;">'+esc(p.grupo)+'</td>'
+     +'<td style="padding:5px 10px;border-bottom:1px solid #eef1f6;'+TIPO_CORREO+';font-size:10.5pt;color:#6b7280;">'+esc(p.donde)+'</td>'
+     +'</tr>';
+  }).join("");
+
+  var cab=[f.organo,lugar(f),f.fuente,f.expediente?"Expte. "+f.expediente:""].filter(Boolean).map(esc).join(" &middot; ");
+
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+   +'<body style="margin:0;padding:0;background:#ffffff;">'
+   +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;"><tr><td style="padding:4px 2px 18px;">'
+   +'<div style="'+TIPO_CORREO+';font-size:10pt;color:#6b7280;padding-bottom:10px;">Licitación de interés</div>'
+   +(etiquetas?'<table cellpadding="0" cellspacing="0"><tr>'+etiquetas+'</tr></table>':"")
+   +'<div style="'+TIPO_CORREO+';font-size:15pt;font-weight:bold;color:#0066ff;line-height:1.3;padding:14px 0 6px;">'+esc(f.titulo)+'</div>'
+   +'<div style="'+TIPO_CORREO+';font-size:10pt;color:#6b7280;padding-bottom:18px;">'+cab+'</div>'
+   +'<table width="100%" cellpadding="0" cellspacing="0">'+filas+'</table>';
+
+  if(palabras){
+    h+='<div style="'+TIPO_CORREO+';font-size:9pt;font-weight:bold;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #e3e8ef;padding:16px 0 8px;">Por qué encaja</div>'
+     +'<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e3e8ef;">'
+     +'<tr bgcolor="#f7f9fc">'
+     +'<td style="padding:6px 10px;'+TIPO_CORREO+';font-size:9pt;color:#6b7280;">Palabra clave</td>'
+     +'<td style="padding:6px 10px;'+TIPO_CORREO+';font-size:9pt;color:#6b7280;">Familia</td>'
+     +'<td style="padding:6px 10px;'+TIPO_CORREO+';font-size:9pt;color:#6b7280;">Dónde aparece</td>'
+     +'</tr>'+palabras+'</table>';
+  }
+  if(f.motivos&&f.motivos.length)
+    h+='<div style="'+TIPO_CORREO+';font-size:10pt;color:#374151;padding:10px 0 0;">'+f.motivos.map(esc).join(" &middot; ")+'</div>';
+
+  if(url){
+    h+='<div style="'+TIPO_CORREO+';font-size:10.5pt;color:#111827;padding:20px 0 10px;">Consulta el anuncio completo en:</div>'
+     +'<table cellpadding="0" cellspacing="0"><tr><td bgcolor="#0066ff" style="padding:11px 22px;">'
+     +'<a href="'+esc(url)+'" style="'+TIPO_CORREO+';font-size:10.5pt;font-weight:bold;color:#ffffff;text-decoration:none;">ABRIR EL ANUNCIO ORIGINAL</a>'
+     +'</td></tr></table>';
+  }
+
+  h+='<div style="'+TIPO_CORREO+';font-size:10.5pt;color:#111827;border-top:1px solid #e3e8ef;margin-top:26px;padding:16px 0 10px;">&iquest;Esta licitaci&oacute;n crees que te resulta de inter&eacute;s?</div>'
+   +'<table cellpadding="0" cellspacing="0"><tr>'
+   +'<td bgcolor="#dcfce7" style="padding:9px 18px;border:1px solid #86efac;">'
+   +'<span style="font-family:Segoe UI Emoji,Arial,sans-serif;font-size:13pt;">&#128077;</span>'
+   +'<span style="'+TIPO_CORREO+';font-size:10pt;font-weight:bold;color:#166534;">&nbsp;S&iacute;, me interesa</span></td>'
+   +'<td width="10"></td>'
+   +'<td bgcolor="#fee2e2" style="padding:9px 18px;border:1px solid #fca5a5;">'
+   +'<span style="font-family:Segoe UI Emoji,Arial,sans-serif;font-size:13pt;">&#128078;</span>'
+   +'<span style="'+TIPO_CORREO+';font-size:10pt;font-weight:bold;color:#b91c1c;">&nbsp;No me interesa</span></td>'
+   +'</tr></table>'
+   +'<div style="'+TIPO_CORREO+';font-size:8.5pt;color:#9aa6bd;border-top:1px solid #e3e8ef;margin-top:22px;padding-top:10px;">Compartido desde el Buscador de Licitaciones</div>'
+   +'</td></tr></table></body></html>';
+  return h;
+}
+
+function correoTexto(){
+  var f=FICHA_VISTA.f,l=[];
+  l.push("Licitación de interés");l.push("");
+  l.push(f.titulo);
+  l.push([f.organo,lugar(f),f.fuente,f.expediente?"Expte. "+f.expediente:""].filter(Boolean).join(" · "));
+  l.push("");
+  l.push("Presupuesto total: "+dinero(f.presupuesto));
+  l.push("Valor estimado: "+dinero(f.valor_estimado));
+  l.push("Fecha límite: "+fechaHora(f.fecha_limite));
+  l.push("Tipo y procedimiento: "+[f.tipo,f.procedimiento].filter(Boolean).join(" · "));
+  if(f.duracion)l.push("Duración: "+f.duracion);
+  l.push("Puntos de encaje: "+f.puntos);
+  if((f.palabras||[]).length){
+    l.push("");l.push("POR QUÉ ENCAJA");
+    f.palabras.forEach(function(p){l.push("- "+p.termino+" ("+p.grupo+") — en "+p.donde);});
+  }
+  if(f.motivos&&f.motivos.length)l.push(f.motivos.join(" · "));
+  var url=safeUrl(f.url);
+  if(url){l.push("");l.push("Abrir el anuncio original:");l.push(url);}
+  return l.join("\n");
+}
+
+function asuntoCorreo(){return "Buscador de Licitaciones: "+FICHA_VISTA.f.titulo;}
+
+function avisoCorreo(t){
+  var e=document.getElementById("aviso-correo");
+  if(!e)return;
+  e.textContent=t;
+  clearTimeout(avisoCorreo.t);
+  avisoCorreo.t=setTimeout(function(){e.textContent="";},9000);
+}
+
+function b64(txt){
+  var bytes=new TextEncoder().encode(txt),bin="",k;
+  for(k=0;k<bytes.length;k++)bin+=String.fromCharCode(bytes[k]);
+  return btoa(bin);
+}
+
+function enviarCorreo(){
+  if(!FICHA_VISTA)return;
+  var clave=FICHA_VISTA.f.clave||FICHA_VISTA.i.id,salio=false;
+  function marcar(){salio=true;}
+  addEventListener("blur",marcar,{once:true});
+  document.addEventListener("visibilitychange",marcar,{once:true});
+  try{location.href="licitaciones:compartir?clave="+encodeURIComponent(clave);}catch(e){}
+  setTimeout(function(){
+    removeEventListener("blur",marcar);
+    if(salio||!document.hasFocus()){avisoCorreo("Abriendo Outlook…");return;}
+    descargarEml();
+  },1500);
+}
+
+function descargarEml(){
+  var cuerpo=b64(correoHTML()).replace(/(.{76})/g,"$1\r\n");
+  var eml=["To: ","Subject: =?UTF-8?B?"+b64(asuntoCorreo())+"?=","X-Unsent: 1","MIME-Version: 1.0",
+           "Content-Type: text/html; charset=UTF-8","Content-Transfer-Encoding: base64","",cuerpo,""].join("\r\n");
+  var nombre=("Licitacion "+(FICHA_VISTA.f.expediente||FICHA_VISTA.i.id)).replace(/[\\/:*?"<>|]/g,"-").trim()+".eml";
+  var u=URL.createObjectURL(new Blob([eml],{type:"message/rfc822"})),a=document.createElement("a");
+  a.href=u;a.download=nombre;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(u);},4000);
+  avisoCorreo("Descargado «"+nombre+"»: ábrelo y Outlook lo presenta como correo nuevo.");
+}
+
+function copiarCorreo(){
+  if(!FICHA_VISTA)return;
+  var html=correoHTML(),texto=correoTexto(),listo="Copiado con formato: abre un correo nuevo y pega con Ctrl+V.";
+  if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+    navigator.clipboard.write([new ClipboardItem({
+      "text/html":new Blob([html],{type:"text/html"}),
+      "text/plain":new Blob([texto],{type:"text/plain"})
+    })]).then(function(){avisoCorreo(listo);},function(){copiarAPelo(html,listo);});
+  }else copiarAPelo(html,listo);
+}
+
+function copiarAPelo(html,listo){
+  var d=document.createElement("div");
+  d.contentEditable="true";
+  d.style.cssText="position:fixed;left:-9999px;top:0";
+  d.innerHTML=html;
+  document.body.appendChild(d);
+  var r=document.createRange();r.selectNodeContents(d);
+  var s=getSelection();s.removeAllRanges();s.addRange(r);
+  var ok=document.execCommand("copy");
+  s.removeAllRanges();d.remove();
+  avisoCorreo(ok?listo:"El navegador no ha dejado copiar. Usa «Enviar correo».");
+}
+
 function fichaHTML(i,f){
   var pl=plazo(i),url=safeUrl(f.url);
+  FICHA_VISTA={i:i,f:f};
   var h='<a class="volver" href="javascript:history.back()">Volver</a><div class="ficha-cab">'+etNovedad(f.novedad)+etEncaje(f.encaje)+'<span class="et '+pl.cls+'">'+esc(pl.txt)+'</span></div>'
    +'<h1>'+esc(f.titulo)+'</h1><p class="sub">'+esc(f.organo)+' · '+esc(lugar(f))+' · '+esc(f.fuente)+(f.expediente?' · Expte. '+esc(f.expediente):'')+'</p>';
   if(f.cambios)h+='<div class="aviso ojo"><strong>Qué ha cambiado</strong>'+esc(f.cambios)+'</div>';
@@ -475,7 +690,16 @@ function fichaHTML(i,f){
    +'<div class="dato"><span>Tipo y procedimiento</span><b>'+esc([f.tipo,f.procedimiento].filter(Boolean).join(" · ")||"—")+'</b></div>'
    +'<div class="dato"><span>Duración</span><b>'+esc(f.duracion||"—")+'</b></div>'
    +'<div class="dato"><span>Puntos de encaje</span><b>'+esc(f.puntos)+'</b></div></div>'
-   +'<p>'+(url?'<a class="boton" href="'+esc(url)+'" target="_blank" rel="noopener">Abrir el anuncio original</a>':'')+'</p>';
+   +'<div class="acciones">'
+   +(url?'<a class="boton" href="'+esc(url)+'" target="_blank" rel="noopener">Abrir el anuncio original</a>':'')
+   +'<button type="button" class="boton" onclick="enviarCorreo()">'+ICO.sobre+'Enviar correo</button>'
+   +'<button type="button" class="boton" onclick="copiarCorreo()">'+ICO.copia+'Copiar con formato</button>'
+   +'<span class="interes">'
+     +'<button type="button" class="pulgar si">'+ICO.si+'Sí, me interesa</button>'
+     +'<button type="button" class="pulgar no">'+ICO.no+'No me interesa</button>'
+   +'</span>'
+   +'<span class="sub" id="aviso-correo" aria-live="polite" style="flex-basis:100%;margin:0"></span>'
+   +'</div>';
   if(f.descripcion)h+='<section class="panel"><h2>Qué se contrata</h2><p style="margin:0">'+esc(f.descripcion)+'</p></section>';
   if(f.ia)h+='<section class="panel"><h2>Resumen</h2><p style="margin:0;white-space:pre-line">'+esc(f.ia)+'</p></section>';
   h+='<section class="panel"><h2>Por qué encaja</h2>'

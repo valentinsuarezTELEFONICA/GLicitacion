@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba · Compartir licitación por correo</title>
+<style>
+  :root{
+    --marca:#0066ff; --fondo:#ffffff; --panel:#f7f9fc; --texto:#111827;
+    --suave:#6b7280; --borde:#e3e8ef;
+  }
+  body.oscuro{
+    --fondo:#0f1729; --panel:#182135; --texto:#e8edf6; --suave:#9aa6bd; --borde:#2a3755;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:24px;background:var(--fondo);color:var(--texto);
+       font-family:'Segoe UI',Bahnschrift,system-ui,Arial,sans-serif;}
+  h1{font-size:19px;margin:0}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;
+       padding-bottom:16px;border-bottom:1px solid var(--borde);margin-bottom:20px}
+  button{font:inherit;cursor:pointer}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:1100px){.cols{grid-template-columns:1fr}}
+
+  /* ---------- ficha (como en la web) ---------- */
+  .ficha{background:var(--panel);border:1px solid var(--borde);border-radius:14px;padding:22px}
+  .etqs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .etq{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+  .etq.nueva{background:#ede9fe;color:#5b21b6}
+  .etq.alto{background:#dcfce7;color:#166534}
+  .etq.cerrado{background:#fee2e2;color:#b91c1c}
+  .ficha h2{font-size:17px;line-height:1.35;margin:0 0 6px}
+  .org{font-size:13px;color:var(--suave);margin:0 0 18px}
+  .acciones{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+  .ico{width:40px;height:40px;border:none;border-radius:9px;background:var(--marca);
+       display:grid;place-items:center;transition:transform .15s,background .15s}
+  .ico:hover{background:#0052cc;transform:scale(1.06)}
+  .ico svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+  .btn{border:none;border-radius:9px;padding:10px 16px;font-weight:600;
+       background:var(--marca);color:#fff}
+  .btn.sec{background:transparent;color:var(--marca);border:1px solid var(--marca)}
+  .datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .dato{background:var(--fondo);border:1px solid var(--borde);border-radius:10px;padding:12px}
+  .dato .k{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--suave);margin-bottom:4px}
+  .dato .v{font-size:15px;font-weight:600}
+  .dato .v.eur{color:var(--marca);font-size:17px}
+  .sec{margin-top:18px;padding-top:16px;border-top:1px solid var(--borde)}
+  .sec h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--suave);margin:0 0 10px}
+  .sec ul{margin:6px 0 0 18px;line-height:1.8;font-size:14px}
+  .interes{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .interes p{margin:0;font-size:14px}
+  .pulgares{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+  .pulgar{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9px;
+          font-size:14px;font-weight:600}
+  .pulgar svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .pulgar.si{background:#dcfce7;border:1px solid #86efac;color:#166534}
+  .pulgar.si svg{stroke:#16a34a}
+  .pulgar.no{background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c}
+  .pulgar.no svg{stroke:#dc2626}
+
+  /* ---------- previsualización del correo ---------- */
+  .vista{border:1px solid var(--borde);border-radius:14px;overflow:hidden;background:#fff}
+  .vista .barra{background:var(--panel);color:var(--texto);padding:10px 14px;font-size:12px;
+                border-bottom:1px solid var(--borde);display:flex;justify-content:space-between}
+  .vista iframe{width:100%;height:760px;border:0;background:#fff;display:block}
+  .nota{font-size:13px;line-height:1.65;background:var(--panel);border-left:4px solid var(--marca);
+        border-radius:8px;padding:14px 16px;margin-top:20px}
+  .nota code{background:rgba(0,102,255,.1);padding:1px 5px;border-radius:4px}
+  .aviso{margin-top:10px;font-size:13px;color:var(--suave);min-height:18px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Prueba · Compartir licitación por correo</h1>
+  <button class="btn sec" onclick="tema()">Cambiar tema</button>
+</div>
+
+<div class="cols">
+
+  <!-- ======== IZQUIERDA: la ficha tal como se ve en la web ======== -->
+  <div>
+    <div class="ficha">
+      <div class="etqs">
+        <span class="etq nueva">Nueva</span>
+        <span class="etq alto">Encaje alto</span>
+        <span class="etq cerrado">Plazo cerrado</span>
+      </div>
+      <h2 id="f-titulo"></h2>
+      <p class="org" id="f-org"></p>
+
+      <div class="acciones">
+        <button class="ico" title="Compartir por correo" onclick="compartir()">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+        </button>
+        <button class="btn" onclick="window.open(D.url,'_blank')">Abrir el anuncio original</button>
+        <button class="btn sec" onclick="copiar()">Copiar con formato</button>
+      </div>
+      <div class="aviso" id="aviso"></div>
+
+      <div class="datos" id="f-datos"></div>
+
+      <div class="sec">
+        <h3>Por qué encaja</h3>
+        <strong style="font-size:14px">Palabras clave detectadas:</strong>
+        <ul id="f-palabras"></ul>
+        <p style="font-size:14px;margin:10px 0 0"><strong>CPV:</strong> <span id="f-cpv"></span></p>
+      </div>
+
+      <div class="sec interes">
+        <p>¿Esta licitación crees que te resulta de interés?</p>
+        <div class="pulgares">
+          <span class="pulgar si">
+            <svg viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            Sí, me interesa
+          </span>
+          <span class="pulgar no">
+            <svg viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>
+            No me interesa
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== DERECHA: cómo quedará el correo ======== -->
+  <div class="vista">
+    <div class="barra">
+      <span><strong>Vista previa del correo</strong> — así llega a Outlook</span>
+      <span id="v-asunto"></span>
+    </div>
+    <iframe id="v-cuerpo" title="Vista previa"></iframe>
+  </div>
+</div>
+
+<div class="nota">
+  <strong>Cómo abre el correo.</strong> Un enlace <code>mailto:</code> solo admite texto plano, así
+  que para un correo maquetado hay que salir del navegador:
+  <ul style="margin:8px 0 0 18px">
+    <li><strong>Icono de correo</strong> → llama al protocolo <code>licitaciones:</code>, que abre
+      Outlook directamente con el correo montado. Requiere registrarlo una vez en Windows; mientras
+      no lo esté, descarga el <code>.eml</code> como ahora.</li>
+    <li><strong>Copiar con formato</strong> → copia el bloque al portapapeles manteniendo negritas,
+      colores y enlaces. Abres un correo nuevo y pegas con <code>Ctrl+V</code>. Es el plan B si la
+      empresa bloquea tanto el protocolo como la descarga.</li>
+  </ul>
+  Los pulgares son de momento solo decorativos, sin enlace.
+</div>
+
+<script>
+/* ===================================================================
+   Datos de ejemplo. En la web real salen de la ficha (window.DATOS).
+   =================================================================== */
+const D = {
+  clave: "placsp|2026-AS-ASC-0489",
+  titulo: "Adquisición de recursos técnicos, hardware y software para la incorporación e implementación de la realidad virtual para MAZ M.C.S.S. nº 11.",
+  organo: "Dirección Área Jurídica y Prestación de MAZ, Mutua Colaboradora con la Seguridad Social, Nº 11",
+  lugar: "Zaragoza, Aragón",
+  fuente: "PLACSP",
+  expediente: "2026/AS/ASC/0489",
+  presupuesto: "103.355 €",
+  valor: "124.026 €",
+  limite: "28/10/2026 23:59",
+  publicada: "01/10/2026",
+  tipo: "Servicios · Abierto simplificado",
+  duracion: "4 años",
+  puntos: "100",
+  cpv: "72212931 (Servicios informáticos)",
+  palabras: [
+    { termino:"realidad virtual", grupo:"Realidad virtual, aumentada e inmersiva", donde:"título" },
+    { termino:"software",         grupo:"Software y aplicaciones",                 donde:"título" }
+  ],
+  url: "https://contrataciondelestado.es/wps/portal/plataforma/detalle/simple/AS/0001000201600025"
+};
+
+const ASUNTO = "Buscador de Licitaciones: " + D.titulo;
+
+/* ===================================================================
+   Cuerpo del correo.
+   Outlook pinta el HTML con el motor de Word: nada de flex, grid ni
+   hojas de estilo. Todo con <table> y estilos en línea.
+   =================================================================== */
+function correoHTML(){
+  const celda = (k,v,azul) => !v ? "" : `
+    <td width="33%" valign="top" style="padding:0 6px 12px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e3e8ef;background:#f7f9fc;">
+        <tr><td style="padding:10px 12px;">
+          <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:8.5pt;color:#6b7280;
+                      text-transform:uppercase;letter-spacing:.4px;padding-bottom:3px;">${k}</div>
+          <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:${azul?'13pt':'11pt'};
+                      font-weight:bold;color:${azul?'#0066ff':'#111827'};">${v}</div>
+        </td></tr>
+      </table>
+    </td>`;
+
+  const datos = [
+    ["Presupuesto total", D.presupuesto, true],
+    ["Valor estimado",    D.valor,       false],
+    ["Fecha límite",      D.limite,      false],
+    ["Publicada",         D.publicada,   false],
+    ["Tipo y procedimiento", D.tipo,     false],
+    ["Duración",          D.duracion,    false],
+    ["Puntos de encaje",  D.puntos,      false]
+  ].filter(d => d[1]);
+
+  let filas = "";
+  for(let i=0;i<datos.length;i+=3){
+    const tres = datos.slice(i,i+3);
+    filas += "<tr>" + tres.map(d=>celda(d[0],d[1],d[2])).join("")
+           + (tres.length<3 ? `<td width="${33*(3-tres.length)}%"></td>` : "") + "</tr>";
+  }
+
+  const palabras = D.palabras.map(p=>`
+    <tr>
+      <td style="padding:5px 10px;border-bottom:1px solid #eef1f6;font-family:'Segoe UI',Arial,sans-serif;
+                 font-size:10.5pt;"><strong>${p.termino}</strong></td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eef1f6;font-family:'Segoe UI',Arial,sans-serif;
+                 font-size:10.5pt;color:#374151;">${p.grupo}</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eef1f6;font-family:'Segoe UI',Arial,sans-serif;
+                 font-size:10.5pt;color:#6b7280;">en ${p.donde}</td>
+    </tr>`).join("");
+
+  const cabecera = [D.organo, D.lugar, D.fuente, D.expediente ? "Expte. "+D.expediente : ""]
+                   .filter(Boolean).join(" &middot; ");
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+<tr><td style="padding:4px 2px 18px;">
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;color:#6b7280;padding-bottom:10px;">
+    Licitación de interés
+  </div>
+
+  <table cellpadding="0" cellspacing="0"><tr>
+    <td bgcolor="#ede9fe" style="padding:4px 10px;font-family:'Segoe UI',Arial,sans-serif;
+        font-size:8.5pt;font-weight:bold;color:#5b21b6;">Nueva</td>
+    <td width="8"></td>
+    <td bgcolor="#dcfce7" style="padding:4px 10px;font-family:'Segoe UI',Arial,sans-serif;
+        font-size:8.5pt;font-weight:bold;color:#166534;">Encaje alto</td>
+  </tr></table>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:15pt;font-weight:bold;
+              color:#0066ff;line-height:1.3;padding:14px 0 6px;">${D.titulo}</div>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;color:#6b7280;
+              padding-bottom:18px;">${cabecera}</div>
+
+  <table width="100%" cellpadding="0" cellspacing="0">${filas}</table>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;font-weight:bold;color:#6b7280;
+              text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #e3e8ef;
+              padding:16px 0 8px;">Por qué encaja</div>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e3e8ef;">
+    <tr bgcolor="#f7f9fc">
+      <td style="padding:6px 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;
+                 color:#6b7280;">Palabra clave</td>
+      <td style="padding:6px 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;
+                 color:#6b7280;">Familia</td>
+      <td style="padding:6px 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;
+                 color:#6b7280;">Dónde aparece</td>
+    </tr>
+    ${palabras}
+  </table>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;color:#374151;padding:10px 0 20px;">
+    <strong>CPV:</strong> ${D.cpv}
+  </div>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10.5pt;color:#111827;padding-bottom:10px;">
+    Consulta el anuncio completo en:
+  </div>
+  <table cellpadding="0" cellspacing="0"><tr>
+    <td bgcolor="#0066ff" style="padding:11px 22px;">
+      <a href="${D.url}" style="font-family:'Segoe UI',Arial,sans-serif;font-size:10.5pt;
+         font-weight:bold;color:#ffffff;text-decoration:none;">ABRIR EL ANUNCIO ORIGINAL</a>
+    </td>
+  </tr></table>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10.5pt;color:#111827;
+              border-top:1px solid #e3e8ef;margin-top:26px;padding:16px 0 10px;">
+    &iquest;Esta licitaci&oacute;n crees que te resulta de inter&eacute;s?
+  </div>
+  <table cellpadding="0" cellspacing="0"><tr>
+    <td bgcolor="#dcfce7" style="padding:9px 18px;border:1px solid #86efac;">
+      <span style="font-family:'Segoe UI Emoji',Arial,sans-serif;font-size:13pt;">&#128077;</span>
+      <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;font-weight:bold;
+            color:#166534;">&nbsp;S&iacute;, me interesa</span>
+    </td>
+    <td width="10"></td>
+    <td bgcolor="#fee2e2" style="padding:9px 18px;border:1px solid #fca5a5;">
+      <span style="font-family:'Segoe UI Emoji',Arial,sans-serif;font-size:13pt;">&#128078;</span>
+      <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;font-weight:bold;
+            color:#b91c1c;">&nbsp;No me interesa</span>
+    </td>
+  </tr></table>
+
+  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:8.5pt;color:#9aa6bd;
+              border-top:1px solid #e3e8ef;margin-top:22px;padding-top:10px;">
+    Compartido desde el Buscador de Licitaciones
+  </div>
+
+</td></tr></table>
+</body></html>`;
+}
+
+/* Versión en texto plano, para el portapapeles y para clientes sin HTML */
+function correoTexto(){
+  const l = [];
+  l.push("Licitación de interés");
+  l.push("");
+  l.push(D.titulo);
+  l.push(`${D.organo} · ${D.lugar} · ${D.fuente} · Expte. ${D.expediente}`);
+  l.push("");
+  l.push(`Presupuesto total: ${D.presupuesto}`);
+  l.push(`Valor estimado: ${D.valor}`);
+  l.push(`Fecha límite: ${D.limite}`);
+  l.push(`Tipo y procedimiento: ${D.tipo}`);
+  l.push(`Duración: ${D.duracion}`);
+  l.push(`Puntos de encaje: ${D.puntos}`);
+  l.push("");
+  l.push("POR QUÉ ENCAJA");
+  D.palabras.forEach(p => l.push(`- ${p.termino} (${p.grupo}) — en ${p.donde}`));
+  l.push(`CPV: ${D.cpv}`);
+  l.push("");
+  l.push("Abrir el anuncio original:");
+  l.push(D.url);
+  return l.join("\n");
+}
+
+/* ===================================================================
+   Vía 1 · archivo .eml  →  Outlook lo abre como mensaje nuevo
+   La cabecera X-Unsent: 1 es lo que hace que salga editable y con
+   el botón Enviar activo, en vez de como correo recibido.
+   =================================================================== */
+function b64(texto){
+  const bytes = new TextEncoder().encode(texto);
+  let bin = "";
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+/* Primero se intenta el protocolo «licitaciones:», que abre Outlook de un clic
+   (hace falta registrarlo una vez en Windows). Si no está registrado, el
+   navegador se queda quieto y a los 1,5 s caemos al .eml. */
+function compartir(){
+  const enlace = "licitaciones:compartir?clave=" + encodeURIComponent(D.clave);
+  let salio = false;
+  const marcar = () => salio = true;
+  addEventListener("blur", marcar, { once:true });
+  document.addEventListener("visibilitychange", marcar, { once:true });
+
+  try { location.href = enlace; } catch(e) { /* protocolo no registrado */ }
+
+  setTimeout(() => {
+    removeEventListener("blur", marcar);
+    if (salio || !document.hasFocus()) { decir("Abriendo Outlook…"); return; }
+    descargarEml();
+  }, 1500);
+}
+
+function descargarEml(){
+  const cuerpo = b64(correoHTML()).replace(/(.{76})/g, "$1\r\n");
+  const eml = [
+    "To: ",
+    "Subject: =?UTF-8?B?" + b64(ASUNTO) + "?=",
+    "X-Unsent: 1",
+    "MIME-Version: 1.0",
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    cuerpo,
+    ""
+  ].join("\r\n");
+
+  const nombre = "Licitacion " + (D.expediente || "").replace(/[\\/:*?"<>|]/g, "-") + ".eml";
+  const url = URL.createObjectURL(new Blob([eml], { type: "message/rfc822" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre.trim();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  decir("El protocolo «licitaciones:» aún no está registrado, así que he descargado «"
+        + nombre.trim() + "». Ábrelo y Outlook lo presenta como correo nuevo.");
+}
+
+/* ===================================================================
+   Vía 2 · portapapeles con formato  →  abrir correo y Ctrl+V
+   =================================================================== */
+async function copiar(){
+  const html = correoHTML(), texto = correoTexto();
+  try{
+    await navigator.clipboard.write([ new ClipboardItem({
+      "text/html":  new Blob([html],  { type:"text/html" }),
+      "text/plain": new Blob([texto], { type:"text/plain" })
+    })]);
+    decir("Copiado con formato. Abre un correo nuevo y pega con Ctrl+V.");
+  }catch(e){
+    const div = document.createElement("div");
+    div.contentEditable = "true";
+    div.style.cssText = "position:fixed;left:-9999px;top:0;";
+    div.innerHTML = html;
+    document.body.appendChild(div);
+    const r = document.createRange(); r.selectNodeContents(div);
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    const ok = document.execCommand("copy");
+    s.removeAllRanges(); div.remove();
+    decir(ok ? "Copiado con formato. Abre un correo nuevo y pega con Ctrl+V."
+             : "El navegador no ha dejado copiar. Usa el icono de correo.");
+  }
+}
+
+function decir(t){
+  const a = document.getElementById("aviso");
+  a.textContent = t;
+  clearTimeout(decir.t);
+  decir.t = setTimeout(() => a.textContent = "", 9000);
+}
+
+function tema(){ document.body.classList.toggle("oscuro"); }
+
+/* ===================================================================
+   Pintar la ficha y la vista previa
+   =================================================================== */
+(function pintar(){
+  document.getElementById("f-titulo").textContent = D.titulo;
+  document.getElementById("f-org").textContent =
+    [D.organo, D.lugar, D.fuente, "Expte. " + D.expediente].join(" · ");
+  document.getElementById("f-cpv").textContent = D.cpv;
+
+  document.getElementById("f-datos").innerHTML = [
+    ["Presupuesto total", D.presupuesto, "eur"],
+    ["Valor estimado",    D.valor,       ""],
+    ["Fecha límite",      D.limite,      ""],
+    ["Publicada",         D.publicada,   ""],
+    ["Tipo y procedimiento", D.tipo,     ""],
+    ["Duración",          D.duracion,    ""],
+    ["Puntos de encaje",  D.puntos,      ""]
+  ].map(([k,v,c]) => `<div class="dato"><div class="k">${k}</div><div class="v ${c}">${v}</div></div>`).join("");
+
+  document.getElementById("f-palabras").innerHTML = D.palabras
+    .map(p => `<li><strong>${p.termino}</strong> (${p.grupo}) — en ${p.donde}</li>`).join("");
+
+  document.getElementById("v-asunto").textContent = "Asunto: " + ASUNTO;
+  const doc = document.getElementById("v-cuerpo").contentDocument;
+  doc.open(); doc.write(correoHTML()); doc.close();
+})();
+</script>
+</body>
+</html>
