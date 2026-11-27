@@ -38,3 +38,7 @@ Thumbs.db
 *.tmp
 *.temp
 *.bak
+
+# Generados por preparar_protocolo.py: llevan dentro rutas de este equipo
+registrar_protocolo.reg
+quitar_protocolo.reg

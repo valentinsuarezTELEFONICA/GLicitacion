@@ -627,11 +627,11 @@ function b64(txt){
 
 function enviarCorreo(){
   if(!FICHA_VISTA)return;
-  var clave=FICHA_VISTA.f.clave||FICHA_VISTA.i.id,salio=false;
+  var id=FICHA_VISTA.i.id,salio=false;
   function marcar(){salio=true;}
   addEventListener("blur",marcar,{once:true});
   document.addEventListener("visibilitychange",marcar,{once:true});
-  try{location.href="licitaciones:compartir?clave="+encodeURIComponent(clave);}catch(e){}
+  try{location.href="licitaciones:compartir?id="+encodeURIComponent(id);}catch(e){}
   setTimeout(function(){
     removeEventListener("blur",marcar);
     if(salio||!document.hasFocus()){avisoCorreo("Abriendo Outlook…");return;}
@@ -673,6 +673,11 @@ function copiarAPelo(html,listo){
   s.removeAllRanges();d.remove();
   avisoCorreo(ok?listo:"El navegador no ha dejado copiar. Usa «Enviar correo».");
 }
+
+/* Todo este script vive dentro de (function(){…})(), así que las funciones no
+   son globales; los onclick de la ficha se evalúan fuera y no las verían. */
+window.enviarCorreo=enviarCorreo;
+window.copiarCorreo=copiarCorreo;
 
 function fichaHTML(i,f){
   var pl=plazo(i),url=safeUrl(f.url);

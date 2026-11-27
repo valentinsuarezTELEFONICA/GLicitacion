@@ -58,6 +58,22 @@ Carpeta del programa:
 - `palabras_clave.xlsx`: hojas Instrucciones, Grupos, Palabras (Normal = raíz + terminaciones / Exacta), CPV,
   Exclusiones, Ajustes. Es la **única** fuente de reglas. Se edita con Excel o con el panel Configuración de
   la web, que escribe en el mismo archivo.
+- Compartir por correo (27/11/2026): en la ficha, `Enviar correo` y `Copiar con formato`, más los
+  pulgares de interés (solo visuales, sin acción todavía). El cuerpo se arma en HTML con tablas y
+  estilos en línea porque Outlook lo pinta con el motor de Word; `mailto:` quedó descartado porque
+  solo admite texto plano, y `ActiveXObject` porque murió con Internet Explorer. El botón navega a
+  `licitaciones:compartir?id=<id corto de la ficha>`, protocolo registrado en
+  `HKCU\Software\Classes\licitaciones`. Los dos .reg los escribe `preparar_protocolo.py` y están en
+  el `.gitignore`, porque llevan dentro la ruta del programa y la de Python; si se mueve la carpeta
+  hay que regenerarlos. Las funciones del correo se exponen en `window` (`window.enviarCorreo`),
+  porque todo el script del index vive dentro de `(function(){…})()` con "use strict" y los onclick
+  se evalúan en el ámbito global: sin eso el botón no hace nada.
+  `compartir_correo.py` lee `informes/datos/f/<id>.js`, valida el id contra `[0-9a-zA-Z_-]{6,64}`,
+  escapa todos los campos y abre Outlook por COM si hay pywin32 (así conserva la firma) o, si no,
+  escribiendo un `.eml` con `X-Unsent: 1` en la carpeta temporal y abriéndolo. Si el protocolo no
+  está registrado, la web espera 1,5 s y descarga el `.eml` ella misma. La plantilla del correo está
+  duplicada a propósito en `web/index.html` y en `compartir_correo.py`: sin servidor no hay forma de
+  compartirla. `prueba_compartir_mail.html` es la maqueta de referencia, con vista previa al lado.
 - `ejecutar_diario.bat`: `py licitaciones.py >> ejecucion.log`, para el Programador de tareas.
 
 Estructura de salida: `informes/AAAA-MM-DD/{licitaciones_*.xlsx, .pdf, pliegos/}`, `informes/HISTORICO_licitaciones.xlsx`,

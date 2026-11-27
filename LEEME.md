@@ -108,6 +108,31 @@ vista por día con enlaces al Excel y PDF.
 Prueba sin conexión: `py licitaciones.py --demo --abrir-web`. Para rehacer la web sin buscar:
 `py licitaciones.py --solo-web`. La web es de solo lectura: no guarda quién se queda cada oferta.
 
+**Compartir una licitación por correo.** En la ficha hay dos botones. *Enviar correo* abre Outlook con
+el mensaje ya maquetado (título, importes, plazo, por qué encaja y un botón al anuncio original), con
+el *Para* vacío para que pongas tú al destinatario. No adjunta archivos: solo enlaces. *Copiar con
+formato* copia ese mismo bloque al portapapeles, manteniendo negritas y enlaces, para pegarlo con
+`Ctrl+V` en un correo que ya tengas abierto.
+
+Para que *Enviar correo* abra Outlook de un solo clic hay que registrar una vez el protocolo
+`licitaciones:`. Son dos pasos, y solo la primera vez:
+
+    py preparar_protocolo.py
+
+y después doble clic en **`registrar_protocolo.reg`** (es para tu usuario, no pide administrador).
+La primera vez Chrome pregunta si permite abrir la aplicación: marca «Permitir siempre». Quien no lo
+tenga registrado —por ejemplo los comerciales, que no tienen el programa— se descarga un `.eml` que
+al abrirlo hace lo mismo. Para desactivarlo, `quitar_protocolo.reg`.
+
+Los `.reg` se generan en vez de venir hechos porque llevan dentro la ruta de la carpeta y la del
+Python instalado: si mueves el programa o cambias de versión de Python, vuelve a ejecutar
+`preparar_protocolo.py` y a importar el archivo. Quien atiende la llamada es `compartir_correo.py`,
+que lee la ficha de `informes\datos\f\` y se la pasa a Outlook. Con el paquete **pywin32** instalado
+(`py -m pip install pywin32`) el correo además conserva tu firma; sin él sale sin ella.
+
+Los pulgares *Sí, me interesa* y *No me interesa* se ven en la ficha y en el correo, pero todavía no
+registran nada: de momento son solo visuales.
+
 ## 8. Otras opciones
 
 - `--dias 3` revisa los últimos 3 días · `--sin-pliegos` va más rápido · `--fuentes placsp,boe`.
